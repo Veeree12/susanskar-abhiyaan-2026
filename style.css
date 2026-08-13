@@ -13,7 +13,7 @@ button,input,select,textarea{font:inherit}
   height:365px;
   background:
     linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.65)),
-    url("hero.jpg") center/cover no-repeat;
+    url("hero.png") center/cover no-repeat;
   border-radius:0 0 35px 35px;
   position:relative;
 }
