@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sushankar Abhiyaan 2026 - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <main class="page-wrap">
+    <section class="hero">
+      <div class="hero-overlay">
+        <h1>LOGIN</h1>
+      </div>
+    </section>
+
+    <section class="card login-card">
+      <label for="dob">Date Of Birth</label>
+      <div class="input-wrap">
+        <span class="icon">▣</span>
+        <input id="dob" type="date" aria-label="Date of Birth">
+      </div>
+
+      <label for="whatsapp">Whatsapp No.</label>
+      <div class="input-wrap">
+        <span class="icon">☎</span>
+        <input id="whatsapp" type="tel" inputmode="numeric" maxlength="10"
+               placeholder="Enter Whatsapp No.">
+      </div>
+
+      <button class="primary-btn" onclick="login()">LOGIN</button>
+
+      <p class="register-line">Not yet registered?
+        <a href="registration.html">Student Registration</a>
+      </p>
+      <p id="login-message" class="message"></p>
+    </section>
+
+    <section class="info-card">
+      <div class="info-title">:: सम्पूर्ण लाभार्थी ::</div>
+      <p>मातृश्री फैंसीबेन करसूरचंदजी तेजावत परिवार, हरजी (श्रीदेवी ज्वेलर्स)</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
