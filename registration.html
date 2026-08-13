@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sushankar Abhiyaan 2026 Phase 2 - Registration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="registration-page">
+  <main class="form-shell">
+    <h1>Sushankar Abhiyaan 2026 Phase 2</h1>
+    <h2>Registration Form</h2>
+    <hr>
+
+    <form id="registrationForm" onsubmit="submitRegistration(event)">
+      <div class="row three">
+        <div class="field">
+          <label>First Name</label>
+          <input name="firstName" placeholder="First name" required>
+        </div>
+        <div class="field">
+          <label>Middle Name</label>
+          <input name="middleName" placeholder="Middle name" required>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input name="lastName" placeholder="Last name" required>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row three">
+        <div class="field">
+          <label>Gender</label>
+          <select name="gender" required>
+            <option value="">Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field dob-group">
+          <label>Date of Birth</label>
+          <div class="dob-fields">
+            <select name="dobDay" required>
+              <option value="">Date</option>
+              <script>
+                for(let i=1;i<=31;i++) document.write(`<option value="${String(i).padStart(2,'0')}">${i}</option>`);
+              </script>
+            </select>
+            <select name="dobMonth" required>
+              <option value="">Month</option>
+              <script>
+                const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                months.forEach((m,i)=>document.write(`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`));
+              </script>
+            </select>
+            <input name="dobYear" type="number" min="1900" max="2026" placeholder="Year" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Whatsapp Number</label>
+          <input name="whatsapp" type="tel" inputmode="numeric" maxlength="10"
+                 placeholder="Whatsapp Number" required>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="field address-field">
+        <label>Address</label>
+        <textarea name="address" placeholder="Your full address" required></textarea>
+      </div>
+
+      <hr>
+
+      <button class="register-btn" type="submit">Register</button>
+      <p id="registration-message" class="message"></p>
+    </form>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
