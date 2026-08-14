@@ -13,17 +13,9 @@ button,input,select,textarea{font:inherit}
   height:365px;
   background:
     linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.65)),
-    url("hero.png") center/cover no-repeat;
+    url("hero.jpg") center/cover no-repeat;
   border-radius:0 0 35px 35px;
   position:relative;
-}
-.registration-page {
-  min-height: 100vh;
-  background-image: url("registration-bg.png");
-  background-size: 100% auto;
-  background-position: top center;
-  background-repeat: no-repeat;
-  background-color: #ffffff;
 }
 .hero-overlay{position:absolute;inset:auto 0 28px;text-align:center}
 .hero-overlay h1{margin:0;font-size:58px;text-shadow:2px 3px 4px #777;color:#4b3030}
@@ -54,7 +46,7 @@ button,input,select,textarea{font:inherit}
 .info-card p{font-size:20px;font-weight:700;line-height:1.45}
 
 .form-shell{
-  width:min(94%,1250px);margin:35px auto;background:rgba(255,255,255,0.94);;border:2px solid #6d4b4b;
+  width:min(94%,1250px);margin:35px auto;background:white;border:2px solid #6d4b4b;
   border-radius:30px;padding:55px 70px;box-shadow:0 5px 20px rgba(0,0,0,.08)
 }
 .form-shell h1{text-align:center;font-size:42px;margin:0 0 10px}
@@ -83,10 +75,100 @@ button,input,select,textarea{font:inherit}
   .form-shell h1{font-size:29px}.form-shell h2{font-size:22px}
   .row.three{grid-template-columns:1fr}
   .dob-fields{grid-template-columns:1fr 1fr 1fr}
-  .registration-page {
-    background-size: 100% auto;
-    background-position: top center;
-    background-repeat: no-repeat;
-    background-attachment: scroll;
+}
+/* =========================
+   STUDENT DASHBOARD
+   ========================= */
+
+.dashboard-page {
+  min-height: 100vh;
+  margin: 0;
+  padding: 25px 15px;
+  background: linear-gradient(180deg, #fff5f5, #eef4ff);
+}
+
+.dashboard {
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+}
+
+.dashboard h1 {
+  text-align: center;
+  color: #4d3030;
+  font-size: 30px;
+  margin: 10px 0 5px;
+}
+
+.student-name {
+  text-align: center;
+  color: #777;
+  font-size: 17px;
+  margin-bottom: 25px;
+}
+
+.upload-card {
+  background: rgba(255,255,255,0.96);
+  border-radius: 20px;
+  padding: 22px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 5px 18px rgba(60,60,80,0.12);
+}
+
+.upload-card h2 {
+  color: #4d3030;
+  font-size: 21px;
+  margin: 0 0 18px;
+}
+
+.upload-card input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fafafa;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.upload-card button {
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  padding: 14px;
+  background: #1976ed;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.upload-card button:active {
+  transform: scale(0.98);
+}
+
+.upload-card p {
+  min-height: 20px;
+  text-align: center;
+  font-size: 14px;
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 18px 12px;
+  }
+
+  .dashboard h1 {
+    font-size: 27px;
+  }
+
+  .upload-card {
+    padding: 20px 15px;
+  }
+
+  .upload-card h2 {
+    font-size: 20px;
   }
 }
