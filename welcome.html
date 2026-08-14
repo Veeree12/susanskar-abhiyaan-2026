@@ -1,15 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcome</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="login-page">
-<div class="card" style="margin:80px auto;text-align:center">
-  <h1>Login Successful</h1>
-  <p>Your next student page can be connected here.</p>
-</div>
+
+<body class="dashboard-page">
+
+  <div class="dashboard">
+
+    <h1>Student Dashboard</h1>
+
+    <p id="student-name" class="student-name"></p>
+
+    <!-- AUGUST -->
+    <div class="upload-card">
+      <h2>August Sheet Upload</h2>
+
+      <input
+        type="file"
+        id="August"
+        accept="image/*"
+      >
+
+      <button onclick="uploadImage('August')">
+        Upload August Sheet
+      </button>
+
+      <p id="August-message"></p>
+    </div>
+
+
+    <!-- SEPTEMBER -->
+    <div class="upload-card">
+      <h2>September Sheet Upload</h2>
+
+      <input
+        type="file"
+        id="September"
+        accept="image/*"
+      >
+
+      <button onclick="uploadImage('September')">
+        Upload September Sheet
+      </button>
+
+      <p id="September-message"></p>
+    </div>
+
+
+    <!-- OCTOBER -->
+    <div class="upload-card">
+      <h2>October Sheet Upload</h2>
+
+      <input
+        type="file"
+        id="October"
+        accept="image/*"
+      >
+
+      <button onclick="uploadImage('October')">
+        Upload October Sheet
+      </button>
+
+      <p id="October-message"></p>
+    </div>
+
+
+    <!-- NOVEMBER -->
+    <div class="upload-card">
+      <h2>November Sheet Upload</h2>
+
+      <input
+        type="file"
+        id="November"
+        accept="image/*"
+      >
+
+      <button onclick="uploadImage('November')">
+        Upload November Sheet
+      </button>
+
+      <p id="November-message"></p>
+    </div>
+
+
+    <!-- TOTAL POINTS -->
+    <div class="upload-card">
+      <h2>Total Points Upload</h2>
+
+      <input
+        type="file"
+        id="Total Points"
+        accept="image/*"
+      >
+
+      <button onclick="uploadImage('Total Points')">
+        Upload Total Points
+      </button>
+
+      <p id="Total Points-message"></p>
+    </div>
+
+  </div>
+
+
+<script>
+
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxHJ2TX812WBNjBZ2iH_vHweRTlRdynSl1gpnGwbBwANza1ZasOWszPVYV6IcX8-Ng-4g/exec";
+
+
+// Get login details saved during login
+const dob = localStorage.getItem("studentDOB");
+const whatsapp = localStorage.getItem("studentWhatsapp");
+const studentName = localStorage.getItem("studentName");
+
+
+// Display student name
+if (studentName) {
+  document.getElementById("student-name").textContent =
+    "Welcome, " + studentName;
+}
+
+
+// If user hasn't logged in
+if (!dob || !whatsapp) {
+
+  alert("Please login first.");
+
+  window.location.href = "index.html";
+}
+
+
+// ===============================
+// UPLOAD IMAGE
+// ===============================
+
+async function uploadImage(month) {
+
+  const fileInput =
+    document.getElementById(month);
+
+  const message =
+    document.getElementById(month + "-message");
+
+
+  if (!fileInput.files.length) {
+
+    message.textContent =
+      "Please select an image first.";
+
+    message.style.color = "red";
+
+    return;
+  }
+
+
+  const file =
+    fileInput.files[0];
+
+
+  // Limit image size to 5 MB
+  if (file.size > 5 * 1024 * 1024) {
+
+    message.textContent =
+      "Image must be smaller than 5 MB.";
+
+    message.style.color = "red";
+
+    return;
+  }
+
+
+  message.textContent =
+    "Uploading...";
+
+  message.style.color =
+    "#555";
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = async function () {
+
+    const imageData =
+      reader.result;
+
+
+    const formData =
+      new URLSearchParams();
+
+
+    formData.append(
+      "action",
+      "upload"
+    );
+
+    formData.append(
+      "dob",
+      dob
+    );
+
+    formData.append(
+      "whatsapp",
+      whatsapp
+    );
+
+    formData.append(
+      "month",
+      month
+    );
+
+    formData.append(
+      "imageData",
+      imageData
+    );
+
+
+    try {
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+
+      const result =
+        await response.json();
+
+
+      if (result.success) {
+
+        message.textContent =
+          "✓ " + result.message;
+
+        message.style.color =
+          "green";
+
+        fileInput.value = "";
+
+      } else {
+
+        message.textContent =
+          result.message;
+
+        message.style.color =
+          "red";
+      }
+
+
+    } catch (error) {
+
+      message.textContent =
+        "Upload failed. Please try again.";
+
+      message.style.color =
+        "red";
+
+    }
+
+  };
+
+
+  reader.readAsDataURL(file);
+}
+
+</script>
+
 </body>
 </html>
