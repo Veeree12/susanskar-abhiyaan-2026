@@ -20,10 +20,10 @@ button,input,select,textarea{font:inherit}
 .registration-page {
   min-height: 100vh;
   background-image: url("registration-bg.png");
-  background-size: cover;
-  background-position: center top;
+  background-size: 100% auto;
+  background-position: top center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-color: #ffffff;
 }
 .hero-overlay{position:absolute;inset:auto 0 28px;text-align:center}
 .hero-overlay h1{margin:0;font-size:58px;text-shadow:2px 3px 4px #777;color:#4b3030}
@@ -83,4 +83,10 @@ button,input,select,textarea{font:inherit}
   .form-shell h1{font-size:29px}.form-shell h2{font-size:22px}
   .row.three{grid-template-columns:1fr}
   .dob-fields{grid-template-columns:1fr 1fr 1fr}
+  .registration-page {
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+  }
 }
