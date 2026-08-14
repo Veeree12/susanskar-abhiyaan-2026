@@ -2,7 +2,7 @@
   IMPORTANT:
   Replace APPS_SCRIPT_URL with your deployed Google Apps Script Web App URL.
 */
-const APPS_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHJ2TX812WBNjBZ2iH_vHweRTlRdynSl1gpnGwbBwANza1ZasOWszPVYV6IcX8-Ng-4g/exec";
 
 function cleanPhone(value){
   return String(value || "").replace(/\D/g,"").slice(-10);
