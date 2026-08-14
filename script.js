@@ -15,34 +15,76 @@ function setMessage(id,text,ok=false){
   el.style.color=ok ? "#16733a" : "#a00000";
 }
 
-async function login(){
-  const dob=document.getElementById("dob").value;
-  const whatsapp=cleanPhone(document.getElementById("whatsapp").value);
+async function login() {
+  const dob = document.getElementById("dob").value;
+  const whatsapp = cleanPhone(
+    document.getElementById("whatsapp").value
+  );
 
-  if(!dob || whatsapp.length!==10){
-    setMessage("login-message","Please enter a valid date of birth and 10-digit WhatsApp number.");
+  if (!dob || whatsapp.length !== 10) {
+    setMessage(
+      "login-message",
+      "Please enter a valid date of birth and 10-digit WhatsApp number."
+    );
     return;
   }
-  if(APPS_SCRIPT_URL.startsWith("PASTE_")){
-    setMessage("login-message","The website is ready, but the Google Apps Script URL has not been added yet.");
+
+  if (APPS_SCRIPT_URL.startsWith("PASTE_")) {
+    setMessage(
+      "login-message",
+      "The Google Apps Script URL has not been added yet."
+    );
     return;
   }
 
-  setMessage("login-message","Checking...");
-  try{
-    const url=APPS_SCRIPT_URL+"?action=login&dob="+encodeURIComponent(dob)+"&whatsapp="+encodeURIComponent(whatsapp);
-    const response=await fetch(url);
-    const data=await response.json();
+  setMessage("login-message", "Checking...");
 
-    if(data.success){
-      setMessage("login-message","Login successful.",true);
-      // Change this destination later to your actual student dashboard/next page.
-      window.location.href="welcome.html";
-    }else{
-      setMessage("login-message",data.message || "Details not found. Please register first.");
+  try {
+    const url =
+      APPS_SCRIPT_URL +
+      "?action=login&dob=" +
+      encodeURIComponent(dob) +
+      "&whatsapp=" +
+      encodeURIComponent(whatsapp);
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.success) {
+
+      // Save student's login details
+      localStorage.setItem("studentDOB", dob);
+      localStorage.setItem("studentWhatsapp", whatsapp);
+      localStorage.setItem(
+        "studentName",
+        data.name || "Student"
+      );
+
+      setMessage(
+        "login-message",
+        "Login successful.",
+        true
+      );
+
+      // Open student dashboard
+      window.location.href = "welcome.html";
+
+    } else {
+
+      setMessage(
+        "login-message",
+        data.message ||
+        "Details not found. Please register first."
+      );
     }
-  }catch(e){
-    setMessage("login-message","Unable to connect to the registration database.");
+
+  } catch (error) {
+
+    setMessage(
+      "login-message",
+      "Unable to connect to the registration database."
+    );
+
   }
 }
 
