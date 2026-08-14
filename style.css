@@ -17,6 +17,14 @@ button,input,select,textarea{font:inherit}
   border-radius:0 0 35px 35px;
   position:relative;
 }
+.registration-page {
+  min-height: 100vh;
+  background-image: url("registration-bg.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 .hero-overlay{position:absolute;inset:auto 0 28px;text-align:center}
 .hero-overlay h1{margin:0;font-size:58px;text-shadow:2px 3px 4px #777;color:#4b3030}
 .card{
@@ -46,7 +54,7 @@ button,input,select,textarea{font:inherit}
 .info-card p{font-size:20px;font-weight:700;line-height:1.45}
 
 .form-shell{
-  width:min(94%,1250px);margin:35px auto;background:white;border:2px solid #6d4b4b;
+  width:min(94%,1250px);margin:35px auto;background:rgba(255,255,255,0.94);;border:2px solid #6d4b4b;
   border-radius:30px;padding:55px 70px;box-shadow:0 5px 20px rgba(0,0,0,.08)
 }
 .form-shell h1{text-align:center;font-size:42px;margin:0 0 10px}
