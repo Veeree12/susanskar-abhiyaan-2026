@@ -171,13 +171,18 @@ button,input,select,textarea{font:inherit}
   .upload-card h2 {
     font-size: 20px;
   }
-  .registration-page {
+    .registration-page {
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+  }
+}
+.registration-page {
   min-height: 100vh;
   background-image: url("registration-bg.png");
   background-size: 100% auto;
   background-position: top center;
   background-repeat: no-repeat;
-  background-attachment: scroll;
   background-color: #ffffff;
- }
 }
