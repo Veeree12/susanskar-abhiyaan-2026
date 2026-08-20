@@ -16,7 +16,30 @@ function setMessage(id,text,ok=false){
 }
 
 async function login() {
-  const dob = document.getElementById("dob").value;
+  const dobInput = document.getElementById("dob").value.trim();
+
+const dobParts = dobInput.split("/");
+
+if (
+      dobParts.length !== 3 ||
+      dobParts[0].length !== 2 ||
+      dobParts[1].length !== 2 ||
+      dobParts[2].length !== 4 ||
+      isNaN(dobParts[0]) ||
+      isNaN(dobParts[1]) ||
+      isNaN(dobParts[2])
+    ) {
+      setMessage(
+        "login-message",
+        "Please enter Date of Birth in DD/MM/YYYY format."
+      );
+      return;
+      }
+    
+    const dob =
+      dobParts[2] + "-" +
+      dobParts[1] + "-" +
+      dobParts[0];
   const whatsapp = cleanPhone(
     document.getElementById("whatsapp").value
   );
