@@ -439,9 +439,11 @@ async function uploadImage(month) {
 
       } catch (error) {
 
+        console.error("Upload error:", error);
+      
         message.textContent =
-          "Upload failed. Please try again.";
-
+          "Upload failed: " + error.message;
+      
         message.style.color =
           "red";
 
