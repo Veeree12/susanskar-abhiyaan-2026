@@ -15,8 +15,13 @@
 
     <p id="student-name" class="student-name"></p>
 
-    <!-- AUGUST -->
+
+    <!-- =========================
+         AUGUST
+    ========================== -->
+
     <div class="upload-card">
+
       <h2>August Sheet Upload</h2>
 
       <input
@@ -30,11 +35,40 @@
       </button>
 
       <p id="August-message"></p>
+
+
+      <label class="points-label">
+        August Points
+      </label>
+
+      <input
+        type="number"
+        id="August-points"
+        class="points-input"
+        min="0"
+        step="1"
+        placeholder="Enter August points"
+      >
+
+      <button
+        class="points-button"
+        onclick="savePoints('August')"
+      >
+        Save August Points
+      </button>
+
+      <p id="August-points-message"></p>
+
     </div>
 
 
-    <!-- SEPTEMBER -->
+
+    <!-- =========================
+         SEPTEMBER
+    ========================== -->
+
     <div class="upload-card">
+
       <h2>September Sheet Upload</h2>
 
       <input
@@ -48,11 +82,40 @@
       </button>
 
       <p id="September-message"></p>
+
+
+      <label class="points-label">
+        September Points
+      </label>
+
+      <input
+        type="number"
+        id="September-points"
+        class="points-input"
+        min="0"
+        step="1"
+        placeholder="Enter September points"
+      >
+
+      <button
+        class="points-button"
+        onclick="savePoints('September')"
+      >
+        Save September Points
+      </button>
+
+      <p id="September-points-message"></p>
+
     </div>
 
 
-    <!-- OCTOBER -->
+
+    <!-- =========================
+         OCTOBER
+    ========================== -->
+
     <div class="upload-card">
+
       <h2>October Sheet Upload</h2>
 
       <input
@@ -66,11 +129,40 @@
       </button>
 
       <p id="October-message"></p>
+
+
+      <label class="points-label">
+        October Points
+      </label>
+
+      <input
+        type="number"
+        id="October-points"
+        class="points-input"
+        min="0"
+        step="1"
+        placeholder="Enter October points"
+      >
+
+      <button
+        class="points-button"
+        onclick="savePoints('October')"
+      >
+        Save October Points
+      </button>
+
+      <p id="October-points-message"></p>
+
     </div>
 
 
-    <!-- NOVEMBER -->
+
+    <!-- =========================
+         NOVEMBER
+    ========================== -->
+
     <div class="upload-card">
+
       <h2>November Sheet Upload</h2>
 
       <input
@@ -84,11 +176,40 @@
       </button>
 
       <p id="November-message"></p>
+
+
+      <label class="points-label">
+        November Points
+      </label>
+
+      <input
+        type="number"
+        id="November-points"
+        class="points-input"
+        min="0"
+        step="1"
+        placeholder="Enter November points"
+      >
+
+      <button
+        class="points-button"
+        onclick="savePoints('November')"
+      >
+        Save November Points
+      </button>
+
+      <p id="November-points-message"></p>
+
     </div>
 
 
-    <!-- TOTAL POINTS -->
+
+    <!-- =========================
+         FINAL TOTAL POINTS
+    ========================== -->
+
     <div class="upload-card">
+
       <h2>Total Points Upload</h2>
 
       <input
@@ -102,9 +223,34 @@
       </button>
 
       <p id="Total Points-message"></p>
+
+
+      <label class="points-label">
+        Final Total Points
+      </label>
+
+      <input
+        type="number"
+        id="Final Total Points-points"
+        class="points-input"
+        min="0"
+        step="1"
+        placeholder="Enter final total points"
+      >
+
+      <button
+        class="points-button"
+        onclick="savePoints('Final Total Points')"
+      >
+        Save Final Total Points
+      </button>
+
+      <p id="Final Total Points-points-message"></p>
+
     </div>
 
   </div>
+
 
 
 <script>
@@ -113,25 +259,45 @@ const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxHJ2TX812WBNjBZ2iH_vHweRTlRdynSl1gpnGwbBwANza1ZasOWszPVYV6IcX8-Ng-4g/exec";
 
 
-// Get login details saved during login
-const dob = localStorage.getItem("studentDOB");
-const whatsapp = localStorage.getItem("studentWhatsapp");
-const studentName = localStorage.getItem("studentName");
+// ===============================
+// GET LOGIN DETAILS
+// ===============================
+
+const dob =
+  localStorage.getItem("studentDOB");
+
+const whatsapp =
+  localStorage.getItem("studentWhatsapp");
+
+const studentName =
+  localStorage.getItem("studentName");
 
 
-// Display student name
+// ===============================
+// DISPLAY STUDENT NAME
+// ===============================
+
 if (studentName) {
-  document.getElementById("student-name").textContent =
+
+  document.getElementById(
+    "student-name"
+  ).textContent =
     "Welcome, " + studentName;
+
 }
 
 
-// If user hasn't logged in
+// ===============================
+// CHECK LOGIN
+// ===============================
+
 if (!dob || !whatsapp) {
 
   alert("Please login first.");
 
-  window.location.href = "index.html";
+  window.location.href =
+    "index.html";
+
 }
 
 
@@ -145,7 +311,9 @@ async function uploadImage(month) {
     document.getElementById(month);
 
   const message =
-    document.getElementById(month + "-message");
+    document.getElementById(
+      month + "-message"
+    );
 
 
   if (!fileInput.files.length) {
@@ -153,9 +321,11 @@ async function uploadImage(month) {
     message.textContent =
       "Please select an image first.";
 
-    message.style.color = "red";
+    message.style.color =
+      "red";
 
     return;
+
   }
 
 
@@ -163,15 +333,20 @@ async function uploadImage(month) {
     fileInput.files[0];
 
 
-  // Limit image size to 5 MB
-  if (file.size > 5 * 1024 * 1024) {
+  // Maximum 5 MB
+  if (
+    file.size >
+    5 * 1024 * 1024
+  ) {
 
     message.textContent =
       "Image must be smaller than 5 MB.";
 
-    message.style.color = "red";
+    message.style.color =
+      "red";
 
     return;
+
   }
 
 
@@ -186,92 +361,247 @@ async function uploadImage(month) {
     new FileReader();
 
 
-  reader.onload = async function () {
+  reader.onload =
+    async function () {
 
-    const imageData =
-      reader.result;
-
-
-    const formData =
-      new URLSearchParams();
+      const imageData =
+        reader.result;
 
 
-    formData.append(
-      "action",
-      "upload"
-    );
-
-    formData.append(
-      "dob",
-      dob
-    );
-
-    formData.append(
-      "whatsapp",
-      whatsapp
-    );
-
-    formData.append(
-      "month",
-      month
-    );
-
-    formData.append(
-      "imageData",
-      imageData
-    );
+      const formData =
+        new URLSearchParams();
 
 
-    try {
+      formData.append(
+        "action",
+        "upload"
+      );
 
-      const response =
-        await fetch(
-          APPS_SCRIPT_URL,
-          {
-            method: "POST",
-            body: formData
-          }
-        );
+      formData.append(
+        "dob",
+        dob
+      );
+
+      formData.append(
+        "whatsapp",
+        whatsapp
+      );
+
+      formData.append(
+        "month",
+        month
+      );
+
+      formData.append(
+        "imageData",
+        imageData
+      );
 
 
-      const result =
-        await response.json();
+      try {
+
+        const response =
+          await fetch(
+            APPS_SCRIPT_URL,
+            {
+              method: "POST",
+              body: formData
+            }
+          );
 
 
-      if (result.success) {
+        const result =
+          await response.json();
+
+
+        if (result.success) {
+
+          message.textContent =
+            "✓ " +
+            result.message;
+
+          message.style.color =
+            "green";
+
+          fileInput.value =
+            "";
+
+        } else {
+
+          message.textContent =
+            result.message;
+
+          message.style.color =
+            "red";
+
+        }
+
+
+      } catch (error) {
 
         message.textContent =
-          "✓ " + result.message;
-
-        message.style.color =
-          "green";
-
-        fileInput.value = "";
-
-      } else {
-
-        message.textContent =
-          result.message;
+          "Upload failed. Please try again.";
 
         message.style.color =
           "red";
+
       }
 
+    };
 
-    } catch (error) {
+
+  reader.readAsDataURL(file);
+
+}
+
+
+
+// ===============================
+// SAVE POINTS
+// ===============================
+
+async function savePoints(category) {
+
+  const input =
+    document.getElementById(
+      category + "-points"
+    );
+
+  const message =
+    document.getElementById(
+      category + "-points-message"
+    );
+
+
+  const points =
+    input.value.trim();
+
+
+  if (points === "") {
+
+    message.textContent =
+      "Please enter points.";
+
+    message.style.color =
+      "red";
+
+    return;
+
+  }
+
+
+  const numericPoints =
+    Number(points);
+
+
+  if (
+    isNaN(numericPoints) ||
+    numericPoints < 0
+  ) {
+
+    message.textContent =
+      "Please enter a valid points value.";
+
+    message.style.color =
+      "red";
+
+    return;
+
+  }
+
+
+  message.textContent =
+    "Saving...";
+
+  message.style.color =
+    "#555";
+
+
+  const formData =
+    new URLSearchParams();
+
+
+  formData.append(
+    "action",
+    "savePoints"
+  );
+
+  formData.append(
+    "dob",
+    dob
+  );
+
+  formData.append(
+    "whatsapp",
+    whatsapp
+  );
+
+
+  // For the final points,
+  // send the correct Apps Script category
+  const apiCategory =
+    category === "Final Total Points"
+      ? "Final Total Points"
+      : category;
+
+
+  formData.append(
+    "month",
+    apiCategory
+  );
+
+  formData.append(
+    "points",
+    numericPoints
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        APPS_SCRIPT_URL,
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (result.success) {
 
       message.textContent =
-        "Upload failed. Please try again.";
+        "✓ " +
+        result.message;
+
+      message.style.color =
+        "green";
+
+    } else {
+
+      message.textContent =
+        result.message;
 
       message.style.color =
         "red";
 
     }
 
-  };
 
+  } catch (error) {
 
-  reader.readAsDataURL(file);
+    message.textContent =
+      "Unable to save points. Please try again.";
+
+    message.style.color =
+      "red";
+
+  }
+
 }
 
 </script>
