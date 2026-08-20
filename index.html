@@ -16,18 +16,36 @@
 
     <section class="card login-card">
       <label for="dob">Date Of Birth</label>
-      <div class="input-wrap">
-        <span class="icon">▣</span>
-        <input
-          id="dob"
-          type="text"
-          inputmode="numeric"
-          maxlength="10"
-          placeholder="DD/MM/YYYY"
-          aria-label="Date of Birth"
-          autocomplete="bday"
-        >
-      </div>
+        <div class="input-wrap dob-wrap">
+          <span class="icon">▣</span>
+        
+          <input
+            id="dob"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            placeholder="DD/MM/YYYY"
+            aria-label="Date of Birth"
+            autocomplete="bday"
+          >
+        
+          <button
+            type="button"
+            class="calendar-btn"
+            onclick="openDOBPicker()"
+            aria-label="Choose date"
+          >
+            📅
+          </button>
+        
+          <input
+            id="dobPicker"
+            type="date"
+            class="hidden-date-picker"
+            aria-hidden="true"
+            tabindex="-1"
+          >
+        </div>
 
       <label for="whatsapp">Whatsapp No.</label>
       <div class="input-wrap">
