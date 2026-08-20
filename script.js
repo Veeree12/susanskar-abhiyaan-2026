@@ -157,3 +157,66 @@ async function submitRegistration(event){
     setMessage("registration-message","Unable to submit. Please check the Apps Script setup.");
   }
 }
+// ================================
+// DOB: Manual DD/MM/YYYY + Calendar
+// ================================
+
+function openDOBPicker() {
+  const picker = document.getElementById("dobPicker");
+
+  if (!picker) return;
+
+  // Try to open the native mobile calendar
+  if (typeof picker.showPicker === "function") {
+    picker.showPicker();
+  } else {
+    picker.click();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const dobInput = document.getElementById("dob");
+  const dobPicker = document.getElementById("dobPicker");
+
+  if (!dobInput || !dobPicker) return;
+
+  // When a date is selected from the calendar
+  dobPicker.addEventListener("change", function () {
+
+    if (!this.value) return;
+
+    // Browser gives YYYY-MM-DD
+    const parts = this.value.split("-");
+
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+
+    // Display DD/MM/YYYY
+    dobInput.value = `${day}/${month}/${year}`;
+  });
+
+  // Automatically add "/" while manually typing
+  dobInput.addEventListener("input", function () {
+
+    let value = this.value.replace(/\D/g, "").slice(0, 8);
+
+    if (value.length > 4) {
+      value =
+        value.substring(0, 2) +
+        "/" +
+        value.substring(2, 4) +
+        "/" +
+        value.substring(4);
+    } else if (value.length > 2) {
+      value =
+        value.substring(0, 2) +
+        "/" +
+        value.substring(2);
+    }
+
+    this.value = value;
+  });
+
+});
