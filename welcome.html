@@ -315,7 +315,6 @@ async function uploadImage(month) {
       month + "-message"
     );
 
-
   if (!fileInput.files.length) {
 
     message.textContent =
@@ -325,137 +324,257 @@ async function uploadImage(month) {
       "red";
 
     return;
-
   }
-
 
   const file =
     fileInput.files[0];
 
-
-  // Maximum 5 MB
-  if (
-    file.size >
-    5 * 1024 * 1024
-  ) {
-
-    message.textContent =
-      "Image must be smaller than 5 MB.";
-
-    message.style.color =
-      "red";
-
-    return;
-
-  }
-
-
   message.textContent =
-    "Uploading...";
+    "Preparing image...";
 
   message.style.color =
     "#555";
 
-
   const reader =
     new FileReader();
 
-
   reader.onload =
-    async function () {
+    function () {
 
-      const imageData =
-        reader.result;
+      const img =
+        new Image();
 
+      img.onload =
+        async function () {
 
-      const formData =
-        new URLSearchParams();
+          const MAX_SIZE = 1600;
 
+          let width = img.width;
+          let height = img.height;
 
-      formData.append(
-        "action",
-        "upload"
-      );
+          if (
+            width > MAX_SIZE ||
+            height > MAX_SIZE
+          ) {
 
-      formData.append(
-        "dob",
-        dob
-      );
+            if (width > height) {
 
-      formData.append(
-        "whatsapp",
-        whatsapp
-      );
+              height =
+                Math.round(
+                  height *
+                  MAX_SIZE /
+                  width
+                );
 
-      formData.append(
-        "month",
-        month
-      );
+              width =
+                MAX_SIZE;
 
-      formData.append(
-        "imageData",
-        imageData
-      );
+            } else {
 
+              width =
+                Math.round(
+                  width *
+                  MAX_SIZE /
+                  height
+                );
 
-      try {
-
-        const response =
-          await fetch(
-            APPS_SCRIPT_URL,
-            {
-              method: "POST",
-              body: formData
+              height =
+                MAX_SIZE;
             }
+          }
+
+          const canvas =
+            document.createElement(
+              "canvas"
+            );
+
+          canvas.width =
+            width;
+
+          canvas.height =
+            height;
+
+          const ctx =
+            canvas.getContext(
+              "2d"
+            );
+
+          if (!ctx) {
+
+            message.textContent =
+              "Unable to process this image.";
+
+            message.style.color =
+              "red";
+
+            return;
+          }
+
+          ctx.fillStyle =
+            "#ffffff";
+
+          ctx.fillRect(
+            0,
+            0,
+            width,
+            height
           );
 
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            width,
+            height
+          );
 
-        const result =
-          await response.json();
+          canvas.toBlob(
+            async function (blob) {
 
+              if (!blob) {
 
-        if (result.success) {
+                message.textContent =
+                  "Unable to process this image.";
+
+                message.style.color =
+                  "red";
+
+                return;
+              }
+
+              message.textContent =
+                "Uploading...";
+
+              message.style.color =
+                "#555";
+
+              const compressedReader =
+                new FileReader();
+
+              compressedReader.onload =
+                async function () {
+
+                  const imageData =
+                    compressedReader.result;
+
+                  const formData =
+                    new URLSearchParams();
+
+                  formData.append(
+                    "action",
+                    "upload"
+                  );
+
+                  formData.append(
+                    "dob",
+                    dob
+                  );
+
+                  formData.append(
+                    "whatsapp",
+                    whatsapp
+                  );
+
+                  formData.append(
+                    "month",
+                    month
+                  );
+
+                  formData.append(
+                    "imageData",
+                    imageData
+                  );
+
+                  try {
+
+                    const response =
+                      await fetch(
+                        APPS_SCRIPT_URL,
+                        {
+                          method: "POST",
+                          body: formData
+                        }
+                      );
+
+                    const result =
+                      await response.json();
+
+                    if (result.success) {
+
+                      message.textContent =
+                        "✓ " +
+                        result.message;
+
+                      message.style.color =
+                        "green";
+
+                      fileInput.value =
+                        "";
+
+                    } else {
+
+                      message.textContent =
+                        result.message ||
+                        "Upload failed.";
+
+                      message.style.color =
+                        "red";
+                    }
+
+                  } catch (error) {
+
+                    console.error(
+                      "Upload error:",
+                      error
+                    );
+
+                    message.textContent =
+                      "Upload failed: " +
+                      error.message;
+
+                    message.style.color =
+                      "red";
+                  }
+
+                };
+
+              compressedReader.readAsDataURL(
+                blob
+              );
+
+            },
+            "image/jpeg",
+            0.85
+          );
+
+        };
+
+      img.onerror =
+        function () {
 
           message.textContent =
-            "✓ " +
-            result.message;
-
-          message.style.color =
-            "green";
-
-          fileInput.value =
-            "";
-
-        } else {
-
-          message.textContent =
-            result.message;
+            "This photo format is not supported. Please choose a JPG or PNG photo.";
 
           message.style.color =
             "red";
+        };
 
-        }
-
-
-      } catch (error) {
-
-        console.error("Upload error:", error);
-      
-        message.textContent =
-          "Upload failed: " + error.message;
-      
-        message.style.color =
-          "red";
-
-      }
-
+      img.src =
+        reader.result;
     };
 
+  reader.onerror =
+    function () {
+
+      message.textContent =
+        "Unable to read this image.";
+
+      message.style.color =
+        "red";
+    };
 
   reader.readAsDataURL(file);
-
 }
-
 
 
 // ===============================
