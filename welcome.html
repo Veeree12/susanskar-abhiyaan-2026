@@ -350,7 +350,16 @@ async function uploadImage(month) {
       img.onload =
         function () {
 
-          const MAX_SIZE = 1600;
+          /*
+           * Google Sheets has a maximum
+           * image size of 1 million pixels.
+           *
+           * Keeping both dimensions at
+           * 1000px or less guarantees
+           * that limit is not exceeded.
+           */
+
+          const MAX_SIZE = 1000;
 
           let width = img.width;
           let height = img.height;
@@ -418,6 +427,12 @@ async function uploadImage(month) {
           }
 
 
+          /*
+           * White background so PNG images
+           * with transparency don't cause
+           * problems when converted to JPEG.
+           */
+
           ctx.fillStyle =
             "#ffffff";
 
@@ -438,174 +453,239 @@ async function uploadImage(month) {
           );
 
 
-          canvas.toBlob(
-            function (blob) {
+          /*
+           * Try JPEG compression.
+           * We keep reducing quality until
+           * the image is comfortably below
+           * Google's 2 MB limit.
+           */
 
-              if (!blob) {
+          function makeCompressedImage(
+            quality
+          ) {
 
-                message.textContent =
-                  "Unable to process this image.";
+            canvas.toBlob(
+              function (blob) {
 
-                message.style.color =
-                  "red";
-
-                return;
-              }
-
-
-              message.textContent =
-                "Uploading...";
-
-              message.style.color =
-                "#555";
-
-
-              const compressedReader =
-                new FileReader();
-
-
-              compressedReader.onload =
-                function () {
-
-                  const imageData =
-                    compressedReader.result;
-
-
-                  /*
-                   * Create a hidden HTML form.
-                   *
-                   * This sends a normal browser POST
-                   * directly to Apps Script and avoids
-                   * the mobile fetch/CORS problem.
-                   */
-
-                  const form =
-                    document.createElement(
-                      "form"
-                    );
-
-                  form.method =
-                    "POST";
-
-                  form.action =
-                    APPS_SCRIPT_URL;
-
-                  form.target =
-                    "uploadFrame";
-
-                  form.style.display =
-                    "none";
-
-
-                  function addField(
-                    name,
-                    value
-                  ) {
-
-                    const input =
-                      document.createElement(
-                        "input"
-                      );
-
-                    input.type =
-                      "hidden";
-
-                    input.name =
-                      name;
-
-                    input.value =
-                      value;
-
-                    form.appendChild(
-                      input
-                    );
-                  }
-
-
-                  addField(
-                    "action",
-                    "upload"
-                  );
-
-                  addField(
-                    "dob",
-                    dob
-                  );
-
-                  addField(
-                    "whatsapp",
-                    whatsapp
-                  );
-
-                  addField(
-                    "month",
-                    month
-                  );
-
-                  addField(
-                    "imageData",
-                    imageData
-                  );
-
-
-                  document.body.appendChild(
-                    form
-                  );
-
-
-                  /*
-                   * Submit normally.
-                   * No fetch() is used here.
-                   */
-
-                  form.submit();
-
-
-                  /*
-                   * We cannot read the Google
-                   * response because it is
-                   * cross-origin.
-                   *
-                   * Give Apps Script a little time
-                   * to process the upload.
-                   */
+                if (!blob) {
 
                   message.textContent =
-                    "Upload submitted. Please wait...";
+                    "Unable to compress this image.";
 
                   message.style.color =
-                    "#555";
+                    "red";
+
+                  return;
+                }
 
 
-                  setTimeout(
-                    function () {
+                /*
+                 * Keep a safety margin below
+                 * Google's 2 MB limit.
+                 */
 
-                      message.textContent =
-                        "✓ Upload submitted successfully.";
+                if (
+                  blob.size > 1.5 * 1024 * 1024 &&
+                  quality > 0.45
+                ) {
 
-                      message.style.color =
-                        "green";
-
-                      fileInput.value =
-                        "";
-
-                      form.remove();
-
-                    },
-                    3000
+                  makeCompressedImage(
+                    quality - 0.10
                   );
 
-                };
+                  return;
+                }
 
 
-              compressedReader.readAsDataURL(
-                blob
-              );
+                /*
+                 * Convert compressed image
+                 * to Base64.
+                 */
 
-            },
-            "image/jpeg",
-            0.85
-          );
+                const compressedReader =
+                  new FileReader();
+
+
+                compressedReader.onload =
+                  function () {
+
+                    const imageData =
+                      compressedReader.result;
+
+
+                    message.textContent =
+                      "Uploading...";
+
+                    message.style.color =
+                      "#555";
+
+
+                    /*
+                     * Create a hidden iframe.
+                     *
+                     * This prevents the phone browser
+                     * from leaving your website and
+                     * opening the Apps Script page.
+                     */
+
+                    const iframe =
+                      document.createElement(
+                        "iframe"
+                      );
+
+                    const frameName =
+                      "uploadFrame_" +
+                      Date.now();
+
+                    iframe.name =
+                      frameName;
+
+                    iframe.style.display =
+                      "none";
+
+                    document.body.appendChild(
+                      iframe
+                    );
+
+
+                    /*
+                     * Create a normal POST form.
+                     */
+
+                    const form =
+                      document.createElement(
+                        "form"
+                      );
+
+                    form.method =
+                      "POST";
+
+                    form.action =
+                      APPS_SCRIPT_URL;
+
+                    form.target =
+                      frameName;
+
+                    form.style.display =
+                      "none";
+
+
+                    function addField(
+                      name,
+                      value
+                    ) {
+
+                      const input =
+                        document.createElement(
+                          "input"
+                        );
+
+                      input.type =
+                        "hidden";
+
+                      input.name =
+                        name;
+
+                      input.value =
+                        value;
+
+                      form.appendChild(
+                        input
+                      );
+                    }
+
+
+                    addField(
+                      "action",
+                      "upload"
+                    );
+
+                    addField(
+                      "dob",
+                      dob
+                    );
+
+                    addField(
+                      "whatsapp",
+                      whatsapp
+                    );
+
+                    addField(
+                      "month",
+                      month
+                    );
+
+                    addField(
+                      "imageData",
+                      imageData
+                    );
+
+
+                    document.body.appendChild(
+                      form
+                    );
+
+
+                    /*
+                     * Send to Apps Script
+                     * without navigating away.
+                     */
+
+                    form.submit();
+
+
+                    message.textContent =
+                      "Upload processing...";
+
+                    message.style.color =
+                      "#555";
+
+
+                    /*
+                     * Give Apps Script time to
+                     * insert the image.
+                     */
+
+                    setTimeout(
+                      function () {
+
+                        message.textContent =
+                          "✓ Upload request sent. Please check your sheet.";
+
+                        message.style.color =
+                          "green";
+
+                        fileInput.value =
+                          "";
+
+                        form.remove();
+                        iframe.remove();
+
+                      },
+                      5000
+                    );
+
+                  };
+
+
+                compressedReader.readAsDataURL(
+                  blob
+                );
+
+              },
+              "image/jpeg",
+              quality
+            );
+          }
+
+
+          /*
+           * Start with good quality.
+           * The function automatically
+           * reduces it if necessary.
+           */
+
+          makeCompressedImage(0.85);
 
         };
 
@@ -638,8 +718,8 @@ async function uploadImage(month) {
 
 
   reader.readAsDataURL(file);
-}
 
+}
 
 // ===============================
 // SAVE POINTS
