@@ -150,15 +150,15 @@ async function login() {
       data.error ===
       "not_registered"
     ) {
-      const registerBox =
-  document.getElementById(
-    "register-highlight"
-  );
-
-if (registerBox) {
-  registerBox.style.display =
-    "block";
-}
+              const registerBox =
+          document.getElementById(
+            "register-highlight"
+          );
+        
+        if (registerBox) {
+          registerBox.style.display =
+            "block";
+        }
       setMessage(
         "login-message",
         "⚠ You are not registered yet. Please register first."
