@@ -17,20 +17,34 @@ function setMessage(id,text,ok=false){
 
 async function login() {
 
+  const dobElement =
+    document.getElementById("dob");
+
+  const whatsappElement =
+    document.getElementById("whatsapp");
+
+  if (!dobElement || !whatsappElement) {
+    alert("Login form could not be loaded.");
+    return;
+  }
+
   const dobInput =
-    document.getElementById("dob").value.trim();
+    dobElement.value.trim();
+
+  const whatsapp =
+    cleanPhone(
+      whatsappElement.value
+    );
 
   const dobParts =
     dobInput.split("/");
+
 
   if (
     dobParts.length !== 3 ||
     dobParts[0].length !== 2 ||
     dobParts[1].length !== 2 ||
-    dobParts[2].length !== 4 ||
-    isNaN(dobParts[0]) ||
-    isNaN(dobParts[1]) ||
-    isNaN(dobParts[2])
+    dobParts[2].length !== 4
   ) {
 
     setMessage(
@@ -50,35 +64,11 @@ async function login() {
     dobParts[0];
 
 
-  const whatsapp =
-    cleanPhone(
-      document.getElementById(
-        "whatsapp"
-      ).value
-    );
-
-
-  if (
-    !dob ||
-    whatsapp.length !== 10
-  ) {
+  if (whatsapp.length !== 10) {
 
     setMessage(
       "login-message",
-      "Please enter a valid date of birth and 10-digit WhatsApp number."
-    );
-
-    return;
-  }
-
-
-  if (
-    APPS_SCRIPT_URL.startsWith("PASTE_")
-  ) {
-
-    setMessage(
-      "login-message",
-      "The Google Apps Script URL has not been added yet."
+      "Please enter a valid 10-digit WhatsApp number."
     );
 
     return;
@@ -106,6 +96,14 @@ async function login() {
       await fetch(url);
 
 
+    if (!response.ok) {
+      throw new Error(
+        "Server returned " +
+        response.status
+      );
+    }
+
+
     const data =
       await response.json();
 
@@ -128,13 +126,6 @@ async function login() {
       );
 
 
-      setMessage(
-        "login-message",
-        "Login successful.",
-        true
-      );
-
-
       window.location.href =
         "welcome.html";
 
@@ -142,59 +133,31 @@ async function login() {
     }
 
 
-    /*
-     * Student has not registered.
-     */
-
     if (
       data.error ===
       "not_registered"
     ) {
-              const registerBox =
-          document.getElementById(
-            "register-highlight"
-          );
-        
-        if (registerBox) {
-          registerBox.style.display =
-            "block";
-        }
+
+      const registerBox =
+        document.getElementById(
+          "register-highlight"
+        );
+
+      if (registerBox) {
+        registerBox.style.display =
+          "block";
+      }
+
+
       setMessage(
         "login-message",
         "⚠ You are not registered yet. Please register first."
       );
 
 
-      const message =
-        document.getElementById(
-          "login-message"
-        );
-
-
-      message.style.background =
-        "#fff3cd";
-
-      message.style.border =
-        "2px solid #ffca2c";
-
-      message.style.padding =
-        "12px";
-
-      message.style.borderRadius =
-        "10px";
-
-      message.style.fontWeight =
-        "600";
-
-
       return;
     }
 
-
-    /*
-     * WhatsApp is registered but
-     * DOB is incorrect.
-     */
 
     if (
       data.error ===
@@ -206,14 +169,9 @@ async function login() {
         "The Date of Birth does not match your registered details."
       );
 
-
       return;
     }
 
-
-    /*
-     * Other error.
-     */
 
     setMessage(
       "login-message",
@@ -238,7 +196,6 @@ async function login() {
   }
 
 }
-
 async function submitRegistration(event){
   event.preventDefault();
   const form=event.target;
