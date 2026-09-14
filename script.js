@@ -196,61 +196,147 @@ async function login() {
   }
 
 }
-async function submitRegistration(event){
+async function submitRegistration(event) {
+
   event.preventDefault();
-  const form=event.target;
-  const data=new FormData(form);
-  const phone=cleanPhone(data.get("whatsapp"));
 
-  if(phone.length!==10){
-    setMessage("registration-message","Please enter a valid 10-digit WhatsApp number.");
-    return;
-  }
+  const form = event.target;
 
-  const dob=`${data.get("dobYear")}-${data.get("dobMonth")}-${data.get("dobDay")}`;
-  const payload=new URLSearchParams({
-    action:"register",
-    firstName:data.get("firstName"),
-    middleName:data.get("middleName"),
-    lastName:data.get("lastName"),
-    gender:data.get("gender"),
-    dob:dob,
-    whatsapp:phone,
-    address:data.get("address")
-  });
+  const data = new FormData(form);
 
-  if(APPS_SCRIPT_URL.startsWith("PASTE_")){
-    setMessage("registration-message","The website is ready, but the Google Apps Script URL has not been added yet.");
-    return;
-  }
-
-  setMessage("registration-message","Submitting...");
-  try{
-    const response=await fetch(APPS_SCRIPT_URL,{
-      method:"POST",
-      body:payload
-    });
-    const result=await response.json();
-
-  if(result.success){
-
-    form.reset();
-
-    localStorage.setItem(
-    "registrationSuccess",
-    "true"
+  const phone =
+    cleanPhone(
+      data.get("whatsapp")
     );
 
-  window.location.href =
-    "index.html";
 
-}
-    }else{
-      setMessage("registration-message",result.message || "Registration failed.");
-    }
-  }catch(e){
-    setMessage("registration-message","Unable to submit. Please check the Apps Script setup.");
+  if (phone.length !== 10) {
+
+    setMessage(
+      "registration-message",
+      "Please enter a valid 10-digit WhatsApp number."
+    );
+
+    return;
   }
+
+
+  const dob =
+    `${data.get("dobYear")}-${data.get("dobMonth")}-${data.get("dobDay")}`;
+
+
+  const payload =
+    new URLSearchParams({
+
+      action: "register",
+
+      firstName:
+        data.get("firstName"),
+
+      middleName:
+        data.get("middleName"),
+
+      lastName:
+        data.get("lastName"),
+
+      gender:
+        data.get("gender"),
+
+      dob: dob,
+
+      whatsapp: phone,
+
+      address:
+        data.get("address")
+
+    });
+
+
+  if (
+    APPS_SCRIPT_URL.startsWith("PASTE_")
+  ) {
+
+    setMessage(
+      "registration-message",
+      "The website is ready, but the Google Apps Script URL has not been added yet."
+    );
+
+    return;
+  }
+
+
+  setMessage(
+    "registration-message",
+    "Submitting..."
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        APPS_SCRIPT_URL,
+        {
+          method: "POST",
+          body: payload
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (result.success) {
+
+      /*
+       * Registration was successfully
+       * saved to Google Sheets.
+       */
+
+      form.reset();
+
+
+      localStorage.setItem(
+        "registrationSuccess",
+        "true"
+      );
+
+
+      /*
+       * Automatically return to
+       * the login page.
+       */
+
+      window.location.href =
+        "index.html";
+
+      return;
+
+    } else {
+
+      setMessage(
+        "registration-message",
+        result.message ||
+        "Registration failed."
+      );
+
+    }
+
+  } catch (e) {
+
+    console.error(
+      "Registration error:",
+      e
+    );
+
+    setMessage(
+      "registration-message",
+      "Unable to submit. Please check the Apps Script setup."
+    );
+
+  }
+
 }
 // ================================
 // DOB: Manual DD/MM/YYYY + Calendar
