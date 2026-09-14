@@ -16,72 +16,117 @@ function setMessage(id,text,ok=false){
 }
 
 async function login() {
-  const dobInput = document.getElementById("dob").value.trim();
 
-const dobParts = dobInput.split("/");
+  const dobInput =
+    document.getElementById("dob").value.trim();
 
-if (
-      dobParts.length !== 3 ||
-      dobParts[0].length !== 2 ||
-      dobParts[1].length !== 2 ||
-      dobParts[2].length !== 4 ||
-      isNaN(dobParts[0]) ||
-      isNaN(dobParts[1]) ||
-      isNaN(dobParts[2])
-    ) {
-      setMessage(
-        "login-message",
-        "Please enter Date of Birth in DD/MM/YYYY format."
-      );
-      return;
-      }
-    
-    const dob =
-      dobParts[2] + "-" +
-      dobParts[1] + "-" +
-      dobParts[0];
-  const whatsapp = cleanPhone(
-    document.getElementById("whatsapp").value
-  );
+  const dobParts =
+    dobInput.split("/");
 
-  if (!dob || whatsapp.length !== 10) {
+  if (
+    dobParts.length !== 3 ||
+    dobParts[0].length !== 2 ||
+    dobParts[1].length !== 2 ||
+    dobParts[2].length !== 4 ||
+    isNaN(dobParts[0]) ||
+    isNaN(dobParts[1]) ||
+    isNaN(dobParts[2])
+  ) {
+
+    setMessage(
+      "login-message",
+      "Please enter Date of Birth in DD/MM/YYYY format."
+    );
+
+    return;
+  }
+
+
+  const dob =
+    dobParts[2] +
+    "-" +
+    dobParts[1] +
+    "-" +
+    dobParts[0];
+
+
+  const whatsapp =
+    cleanPhone(
+      document.getElementById(
+        "whatsapp"
+      ).value
+    );
+
+
+  if (
+    !dob ||
+    whatsapp.length !== 10
+  ) {
+
     setMessage(
       "login-message",
       "Please enter a valid date of birth and 10-digit WhatsApp number."
     );
+
     return;
   }
 
-  if (APPS_SCRIPT_URL.startsWith("PASTE_")) {
+
+  if (
+    APPS_SCRIPT_URL.startsWith("PASTE_")
+  ) {
+
     setMessage(
       "login-message",
       "The Google Apps Script URL has not been added yet."
     );
+
     return;
   }
 
-  setMessage("login-message", "Checking...");
+
+  setMessage(
+    "login-message",
+    "Checking..."
+  );
+
 
   try {
+
     const url =
       APPS_SCRIPT_URL +
-      "?action=login&dob=" +
+      "?action=login" +
+      "&dob=" +
       encodeURIComponent(dob) +
       "&whatsapp=" +
       encodeURIComponent(whatsapp);
 
-    const response = await fetch(url);
-    const data = await response.json();
+
+    const response =
+      await fetch(url);
+
+
+    const data =
+      await response.json();
+
 
     if (data.success) {
 
-      // Save student's login details
-      localStorage.setItem("studentDOB", dob);
-      localStorage.setItem("studentWhatsapp", whatsapp);
+      localStorage.setItem(
+        "studentDOB",
+        dob
+      );
+
+      localStorage.setItem(
+        "studentWhatsapp",
+        whatsapp
+      );
+
       localStorage.setItem(
         "studentName",
         data.name || "Student"
       );
+
 
       setMessage(
         "login-message",
@@ -89,19 +134,93 @@ if (
         true
       );
 
-      // Open student dashboard
-      window.location.href = "welcome.html";
 
-    } else {
+      window.location.href =
+        "welcome.html";
+
+      return;
+    }
+
+
+    /*
+     * Student has not registered.
+     */
+
+    if (
+      data.error ===
+      "not_registered"
+    ) {
 
       setMessage(
         "login-message",
-        data.message ||
-        "Details not found. Please register first."
+        "⚠ You are not registered yet. Please register first."
       );
+
+
+      const message =
+        document.getElementById(
+          "login-message"
+        );
+
+
+      message.style.background =
+        "#fff3cd";
+
+      message.style.border =
+        "2px solid #ffca2c";
+
+      message.style.padding =
+        "12px";
+
+      message.style.borderRadius =
+        "10px";
+
+      message.style.fontWeight =
+        "600";
+
+
+      return;
     }
 
+
+    /*
+     * WhatsApp is registered but
+     * DOB is incorrect.
+     */
+
+    if (
+      data.error ===
+      "wrong_dob"
+    ) {
+
+      setMessage(
+        "login-message",
+        "The Date of Birth does not match your registered details."
+      );
+
+
+      return;
+    }
+
+
+    /*
+     * Other error.
+     */
+
+    setMessage(
+      "login-message",
+      data.message ||
+      "Unable to login. Please try again."
+    );
+
+
   } catch (error) {
+
+    console.error(
+      "Login error:",
+      error
+    );
+
 
     setMessage(
       "login-message",
@@ -109,6 +228,7 @@ if (
     );
 
   }
+
 }
 
 async function submitRegistration(event){
@@ -147,9 +267,19 @@ async function submitRegistration(event){
     });
     const result=await response.json();
 
-    if(result.success){
-      setMessage("registration-message","Registration successful!",true);
-      form.reset();
+  if(result.success){
+
+    form.reset();
+
+    localStorage.setItem(
+    "registrationSuccess",
+    "true"
+    );
+
+  window.location.href =
+    "index.html";
+
+}
     }else{
       setMessage("registration-message",result.message || "Registration failed.");
     }
