@@ -268,3 +268,40 @@ button,input,select,textarea{font:inherit}
 .points-button:active {
   transform: scale(0.98);
 }
+.register-highlight {
+  margin-top: 15px;
+  padding: 18px;
+  background: #fff3cd;
+  border: 2px solid #ffca2c;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.register-highlight-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8a5a00;
+  margin-bottom: 6px;
+}
+
+.register-highlight-text {
+  font-size: 15px;
+  color: #5f4b00;
+  margin-bottom: 14px;
+}
+
+.register-now-btn {
+  display: inline-block;
+  padding: 12px 22px;
+  background: #e53935;
+  color: white;
+  text-decoration: none;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.register-now-btn:hover {
+  background: #c62828;
+}
