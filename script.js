@@ -313,7 +313,8 @@ async function submitRegistration(event) {
 
       return;
 
-    } else {
+    } 
+    else {
 
       setMessage(
         "registration-message",
