@@ -305,3 +305,22 @@ button,input,select,textarea{font:inherit}
 .register-now-btn:hover {
   background: #c62828;
 }
+
+.gift-selection-link {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 15px;
+  padding: 14px;
+  text-align: center;
+  background: #e8a52a;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.gift-selection-link:hover {
+  background: #c88916;
+}
