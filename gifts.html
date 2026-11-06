@@ -1,0 +1,724 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Sushankar Abhiyaan 2026 - Gift Selection</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    .gift-page {
+      max-width: 850px;
+      margin: auto;
+      padding: 25px 15px;
+      min-height: 100vh;
+    }
+
+    .gift-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .gift-card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .gift-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px;
+      margin: 8px 0 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .gift-button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 9px;
+      background: #174c8e;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .gift-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .points-box {
+      background: #eaf5ed;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .points-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #16733a;
+    }
+
+    .gift-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .gift-item {
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      background: white;
+    }
+
+    .gift-item.selected {
+      border-color: #16733a;
+      background: #f0fff4;
+    }
+
+    .gift-placeholder {
+      height: 130px;
+      border-radius: 9px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .gift-item h3 {
+      margin: 5px 0;
+    }
+
+    .gift-points {
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .gift-item label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .gift-summary {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+
+    .gift-message {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media(max-width: 450px) {
+      .gift-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="gift-page">
+
+  <header class="gift-header">
+    <h1>🎁 Gift Selection</h1>
+    <p>Sushankar Abhiyaan 2026 Phase 1</p>
+  </header>
+
+
+  <!-- STUDENT VERIFICATION -->
+
+  <section class="gift-card" id="verificationSection">
+
+    <h2>Verify Your Details</h2>
+
+    <label for="giftDob">Date of Birth</label>
+
+    <input
+      type="text"
+      id="giftDob"
+      class="gift-input"
+      placeholder="DD/MM/YYYY"
+      maxlength="10"
+      inputmode="numeric"
+    >
+
+    <label for="giftWhatsapp">WhatsApp Number</label>
+
+    <input
+      type="tel"
+      id="giftWhatsapp"
+      class="gift-input"
+      placeholder="Enter WhatsApp Number"
+      maxlength="10"
+      inputmode="numeric"
+    >
+
+    <button
+      class="gift-button"
+      id="verifyButton"
+      onclick="verifyStudent()"
+    >
+      VIEW MY GIFTS
+    </button>
+
+    <p id="verificationMessage" class="gift-message"></p>
+
+  </section>
+
+
+  <!-- GIFT SELECTION -->
+
+  <section id="giftSection" class="hidden">
+
+    <div class="gift-card">
+
+      <h2 id="studentGreeting">
+        Welcome!
+      </h2>
+
+      <div class="points-box">
+
+        <p>Your Final Total Points</p>
+
+        <div
+          class="points-number"
+          id="availablePoints"
+        >
+          0
+        </div>
+
+      </div>
+
+      <h2>Available Gifts</h2>
+
+      <p>
+        Select multiple gifts within your available points.
+        Gifts above your points will not be displayed.
+      </p>
+
+      <div
+        class="gift-grid"
+        id="giftGrid"
+      ></div>
+
+      <div class="gift-summary">
+
+        <p>
+          Available Points:
+          <strong id="summaryAvailable">0</strong>
+        </p>
+
+        <p>
+          Selected Gifts:
+          <strong id="selectedCount">0</strong>
+        </p>
+
+        <p>
+          Points Required:
+          <strong id="selectedCost">0</strong>
+        </p>
+
+        <p>
+          Remaining Points:
+          <strong id="remainingPoints">0</strong>
+        </p>
+
+      </div>
+
+      <button
+        class="gift-button"
+        id="submitButton"
+        onclick="confirmGifts()"
+      >
+        SUBMIT FINAL GIFT SELECTION
+      </button>
+
+      <p
+        id="selectionMessage"
+        class="gift-message"
+      ></p>
+
+    </div>
+
+  </section>
+
+
+  <!-- FINAL SUBMISSION MESSAGE -->
+
+  <section
+    id="completedSection"
+    class="gift-card hidden"
+  >
+
+    <h2>🎉 Gift Selection Completed!</h2>
+
+    <p>
+      Your gift selection has been successfully submitted.
+    </p>
+
+    <p id="completedGifts"></p>
+
+    <p>
+      Your selection is final and cannot be changed.
+    </p>
+
+  </section>
+
+</main>
+
+
+<script src="script.js"></script>
+
+<script>
+
+  // Temporary gift catalogue.
+  // We will replace these with your actual gifts later.
+
+  const giftCatalogue = [
+    { name: "Gift A", points: 50, icon: "🎁" },
+    { name: "Gift B", points: 100, icon: "🎒" },
+    { name: "Gift C", points: 200, icon: "⌚" }
+  ];
+
+  let studentDOB = "";
+  let studentWhatsapp = "";
+  let studentPoints = 0;
+  let selectedGifts = [];
+
+
+  // Automatically format DOB
+
+  document.getElementById("giftDob")
+    .addEventListener("input", function() {
+
+      let value = this.value
+        .replace(/\D/g, "")
+        .slice(0, 8);
+
+      if (value.length > 4) {
+        value =
+          value.substring(0, 2) + "/" +
+          value.substring(2, 4) + "/" +
+          value.substring(4);
+      } else if (value.length > 2) {
+        value =
+          value.substring(0, 2) + "/" +
+          value.substring(2);
+      }
+
+      this.value = value;
+
+    });
+
+
+  function showMessage(id, message, success = false) {
+
+    const element =
+      document.getElementById(id);
+
+    element.textContent = message;
+
+    element.style.color =
+      success ? "green" : "red";
+
+  }
+
+
+  async function verifyStudent() {
+
+    const dobInput =
+      document.getElementById("giftDob").value.trim();
+
+    const parts = dobInput.split("/");
+
+    if (
+      parts.length !== 3 ||
+      parts[0].length !== 2 ||
+      parts[1].length !== 2 ||
+      parts[2].length !== 4
+    ) {
+
+      showMessage(
+        "verificationMessage",
+        "Enter DOB in DD/MM/YYYY format."
+      );
+
+      return;
+    }
+
+    const dob =
+      parts[2] + "-" +
+      parts[1] + "-" +
+      parts[0];
+
+    const whatsapp =
+      cleanPhone(
+        document.getElementById("giftWhatsapp").value
+      );
+
+    if (whatsapp.length !== 10) {
+
+      showMessage(
+        "verificationMessage",
+        "Enter a valid 10-digit WhatsApp number."
+      );
+
+      return;
+    }
+
+    const button =
+      document.getElementById("verifyButton");
+
+    button.disabled = true;
+    button.textContent = "VERIFYING...";
+
+    showMessage(
+      "verificationMessage",
+      "Checking your details...",
+      true
+    );
+
+    try {
+
+      const url =
+        APPS_SCRIPT_URL +
+        "?action=giftInfo" +
+        "&dob=" + encodeURIComponent(dob) +
+        "&whatsapp=" + encodeURIComponent(whatsapp);
+
+      const response = await fetch(url);
+
+      const result = await response.json();
+
+      if (!result.success) {
+
+        showMessage(
+          "verificationMessage",
+          result.message || "Student verification failed."
+        );
+
+        return;
+      }
+
+      studentDOB = dob;
+      studentWhatsapp = whatsapp;
+      studentPoints = Number(result.finalPoints) || 0;
+
+      document.getElementById("verificationSection")
+        .classList.add("hidden");
+
+      if (result.alreadySelected) {
+
+        document.getElementById("completedSection")
+          .classList.remove("hidden");
+
+        document.getElementById("completedGifts")
+          .textContent =
+          "Your selected gifts: " + result.selectedGifts;
+
+        return;
+      }
+
+      document.getElementById("giftSection")
+        .classList.remove("hidden");
+
+      document.getElementById("studentGreeting")
+        .textContent =
+        "Welcome, " + result.name + "!";
+
+      document.getElementById("availablePoints")
+        .textContent = studentPoints;
+
+      document.getElementById("summaryAvailable")
+        .textContent = studentPoints;
+
+      renderGifts();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "verificationMessage",
+        "Unable to connect. Please try again."
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "VIEW MY GIFTS";
+
+    }
+
+  }
+
+
+  function renderGifts() {
+
+    const grid =
+      document.getElementById("giftGrid");
+
+    grid.innerHTML = "";
+
+    const eligibleGifts =
+      giftCatalogue.filter(
+        gift => gift.points <= studentPoints
+      );
+
+    if (eligibleGifts.length === 0) {
+
+      grid.innerHTML =
+        "<p>No gifts are currently available for your points.</p>";
+
+      return;
+    }
+
+    eligibleGifts.forEach(function(gift, index) {
+
+      const card =
+        document.createElement("div");
+
+      card.className = "gift-item";
+
+      card.innerHTML = `
+        <div class="gift-placeholder">
+          ${gift.icon}
+        </div>
+
+        <h3>${gift.name}</h3>
+
+        <p class="gift-points">
+          ${gift.points} Points
+        </p>
+
+        <label>
+          <input
+            type="checkbox"
+            value="${gift.name}"
+            onchange="toggleGift('${gift.name}', this)"
+          >
+          Select Gift
+        </label>
+      `;
+
+      grid.appendChild(card);
+
+    });
+
+    updateSummary();
+
+  }
+
+
+  function toggleGift(name, checkbox) {
+
+    const gift =
+      giftCatalogue.find(
+        item => item.name === name
+      );
+
+    if (!gift) return;
+
+    if (checkbox.checked) {
+
+      const currentCost =
+        selectedGifts.reduce(
+          (sum, item) => sum + item.points,
+          0
+        );
+
+      if (
+        currentCost + gift.points >
+        studentPoints
+      ) {
+
+        checkbox.checked = false;
+
+        showMessage(
+          "selectionMessage",
+          "These gifts exceed your available points."
+        );
+
+        return;
+      }
+
+      selectedGifts.push(gift);
+
+      checkbox.closest(".gift-item")
+        .classList.add("selected");
+
+    } else {
+
+      selectedGifts =
+        selectedGifts.filter(
+          item => item.name !== name
+        );
+
+      checkbox.closest(".gift-item")
+        .classList.remove("selected");
+
+    }
+
+    showMessage("selectionMessage", "");
+
+    updateSummary();
+
+  }
+
+
+  function updateSummary() {
+
+    const total =
+      selectedGifts.reduce(
+        (sum, gift) => sum + gift.points,
+        0
+      );
+
+    document.getElementById("selectedCount")
+      .textContent = selectedGifts.length;
+
+    document.getElementById("selectedCost")
+      .textContent = total;
+
+    document.getElementById("remainingPoints")
+      .textContent = studentPoints - total;
+
+  }
+
+
+  async function confirmGifts() {
+
+    if (selectedGifts.length === 0) {
+
+      showMessage(
+        "selectionMessage",
+        "Please select at least one gift."
+      );
+
+      return;
+    }
+
+    const names =
+      selectedGifts.map(
+        gift => gift.name
+      );
+
+    const total =
+      selectedGifts.reduce(
+        (sum, gift) => sum + gift.points,
+        0
+      );
+
+    const confirmed = confirm(
+      "Your selected gifts:\n\n" +
+      names.join("\n") +
+      "\n\nTotal points: " + total +
+      "\n\nThis selection is FINAL and cannot be changed. Continue?"
+    );
+
+    if (!confirmed) return;
+
+    const button =
+      document.getElementById("submitButton");
+
+    button.disabled = true;
+    button.textContent = "SUBMITTING...";
+
+    try {
+
+      const payload =
+        new URLSearchParams({
+
+          action: "submitGifts",
+
+          dob: studentDOB,
+
+          whatsapp: studentWhatsapp,
+
+          gifts: JSON.stringify(names)
+
+        });
+
+      const response =
+        await fetch(
+          APPS_SCRIPT_URL,
+          {
+            method: "POST",
+            body: payload
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (!result.success) {
+
+        showMessage(
+          "selectionMessage",
+          result.message || "Submission failed."
+        );
+
+        button.disabled = false;
+        button.textContent =
+          "SUBMIT FINAL GIFT SELECTION";
+
+        return;
+      }
+
+      document.getElementById("giftSection")
+        .classList.add("hidden");
+
+      document.getElementById("completedSection")
+        .classList.remove("hidden");
+
+      document.getElementById("completedGifts")
+        .textContent =
+        "Your selected gifts: " + names.join(", ");
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "selectionMessage",
+        "Unable to submit. Please try again."
+      );
+
+      button.disabled = false;
+      button.textContent =
+        "SUBMIT FINAL GIFT SELECTION";
+
+    }
+
+  }
+
+</script>
+
+</body>
+</html>
