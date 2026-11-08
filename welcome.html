@@ -437,9 +437,9 @@ async function submitMonthlyUpdate(month) {
   }
 
   function handleResponse(event) {
-    if (!iframe || event.source !== iframe.contentWindow) return;
-
     const data = event.data;
+
+    console.log("Apps Script response:", event.origin, data);
 
     if (!data || data.type !== "monthlyUpdateResult") return;
 
