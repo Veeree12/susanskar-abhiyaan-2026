@@ -46,7 +46,7 @@
 
       <button
         class="points-button"
-        onclick="savePoints('August')"
+        onclick="submitMonthlyUpdate('August')"
       >
         SUBMIT AUGUST UPDATE
       </button>
@@ -345,7 +345,11 @@ async function submitMonthlyUpdate(month) {
 
   const fileInput = document.getElementById(month);
 
-  const pointsInput = document.getElementById(month + "-points");
+  const pointsInput = document.getElementById(
+    month === "Total Points"
+      ? "Final Total Points-points"
+      : month + "-points"
+    );
 
   const imageMessage = document.getElementById(month + "-message");
 
