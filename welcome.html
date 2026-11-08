@@ -353,7 +353,11 @@ async function submitMonthlyUpdate(month) {
 
   const imageMessage = document.getElementById(month + "-message");
 
-  const pointsMessage = document.getElementById(month + "-points-message");
+  const pointsMessage = document.getElementById(
+      month === "Total Points"
+        ? "Final Total Points-points-message"
+        : month + "-points-message"
+  );
 
   const button = document.querySelector(
     `button[onclick="submitMonthlyUpdate('${month}')"]`
