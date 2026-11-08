@@ -88,7 +88,28 @@
       border-color: #16733a;
       background: #f0fff4;
     }
-
+    /* Gifts that the student cannot afford */
+    .gift-item.locked {
+      opacity: 0.55;
+      background: #f2f2f2;
+      border-color: #ccc;
+    }
+    
+    .gift-item.locked label {
+      cursor: not-allowed;
+      color: #888;
+    }
+    
+    .gift-item.locked input {
+      cursor: not-allowed;
+    }
+    
+    .gift-lock-message {
+      color: #c0392b;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
     .gift-placeholder {
       height: 130px;
       border-radius: 9px;
@@ -218,8 +239,8 @@
       <h2>Available Gifts</h2>
 
       <p>
-        Select multiple gifts within your available points.
-        Gifts above your points will not be displayed.
+         Explore all gifts below. Gifts requiring more points
+         than you have will be displayed but locked.
       </p>
 
       <div
@@ -479,61 +500,68 @@
   }
 
 
-  function renderGifts() {
+  
+function renderGifts() {
 
-    const grid =
-      document.getElementById("giftGrid");
+  const grid = document.getElementById("giftGrid");
 
-    grid.innerHTML = "";
+  grid.innerHTML = "";
 
-    const eligibleGifts =
-      giftCatalogue.filter(
-        gift => gift.points <= studentPoints
-      );
+  // Display ALL gifts, including locked gifts.
+  giftCatalogue.forEach(function(gift) {
 
-    if (eligibleGifts.length === 0) {
+    const card = document.createElement("div");
 
-      grid.innerHTML =
-        "<p>No gifts are currently available for your points.</p>";
+    const locked = gift.points > studentPoints;
 
-      return;
-    }
+    card.className = locked
+      ? "gift-item locked"
+      : "gift-item";
 
-    eligibleGifts.forEach(function(gift, index) {
+    card.innerHTML = `
+      <div class="gift-placeholder">
+        ${gift.icon}
+      </div>
 
-      const card =
-        document.createElement("div");
+      <h3>${gift.name}</h3>
 
-      card.className = "gift-item";
+      <p class="gift-points">
+        ${gift.points} Points
+      </p>
 
-      card.innerHTML = `
-        <div class="gift-placeholder">
-          ${gift.icon}
-        </div>
+      ${
+        locked
+          ? `
+            <label>
+              <input type="checkbox" disabled>
+              Locked
+            </label>
 
-        <h3>${gift.name}</h3>
+            <p class="gift-lock-message">
+              Need ${gift.points - studentPoints}
+              more points to unlock
+            </p>
+          `
+          : `
+            <label>
+              <input
+                type="checkbox"
+                value="${gift.name}"
+                onchange="toggleGift('${gift.name}', this)"
+              >
+              Select Gift
+            </label>
+          `
+      }
+    `;
 
-        <p class="gift-points">
-          ${gift.points} Points
-        </p>
+    grid.appendChild(card);
 
-        <label>
-          <input
-            type="checkbox"
-            value="${gift.name}"
-            onchange="toggleGift('${gift.name}', this)"
-          >
-          Select Gift
-        </label>
-      `;
+  });
 
-      grid.appendChild(card);
+  updateSummary();
+}
 
-    });
-
-    updateSummary();
-
-  }
 
 
   function toggleGift(name, checkbox) {
