@@ -341,6 +341,7 @@ function compressImage(file) {
 // COMBINED IMAGE + POINTS SUBMISSION
 // ===============================
 
+
 async function submitMonthlyUpdate(month) {
 
   const fileInput = document.getElementById(month);
@@ -349,28 +350,26 @@ async function submitMonthlyUpdate(month) {
     month === "Total Points"
       ? "Final Total Points-points"
       : month + "-points"
-    );
+  );
 
   const imageMessage = document.getElementById(month + "-message");
 
   const pointsMessage = document.getElementById(
-      month === "Total Points"
-        ? "Final Total Points-points-message"
-        : month + "-points-message"
+    month === "Total Points"
+      ? "Final Total Points-points-message"
+      : month + "-points-message"
   );
 
   const button = document.querySelector(
     `button[onclick="submitMonthlyUpdate('${month}')"]`
   );
 
-  // Validate image
   if (!fileInput || !fileInput.files.length) {
     imageMessage.textContent = "Please select an image first.";
     imageMessage.style.color = "red";
     return;
   }
 
-  // Validate points
   const points = pointsInput.value.trim();
 
   if (points === "") {
@@ -381,14 +380,8 @@ async function submitMonthlyUpdate(month) {
 
   const numericPoints = Number(points);
 
-  if (!Number.isFinite(numericPoints) || numericPoints < 0) {
-    pointsMessage.textContent = "Please enter valid points.";
-    pointsMessage.style.color = "red";
-    return;
-  }
-
-  if (!Number.isInteger(numericPoints)) {
-    pointsMessage.textContent = "Please enter whole-number points.";
+  if (!Number.isInteger(numericPoints) || numericPoints < 0) {
+    pointsMessage.textContent = "Please enter valid whole-number points.";
     pointsMessage.style.color = "red";
     return;
   }
@@ -410,16 +403,64 @@ async function submitMonthlyUpdate(month) {
   pointsMessage.textContent = "Preparing points...";
   pointsMessage.style.color = "#555";
 
+  let iframe = null;
+  let form = null;
+  let responseReceived = false;
+  let timeoutId = null;
+
+  function cleanup() {
+    if (timeoutId) clearTimeout(timeoutId);
+    window.removeEventListener("message", handleResponse);
+
+    if (form) form.remove();
+    if (iframe) iframe.remove();
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "SUBMIT " + month.toUpperCase() + " UPDATE";
+    }
+  }
+
+  function showResult(success, message) {
+    imageMessage.textContent = message;
+    pointsMessage.textContent = message;
+
+    const color = success ? "#16733a" : "red";
+    imageMessage.style.color = color;
+    pointsMessage.style.color = color;
+
+    if (success) {
+      fileInput.value = "";
+    }
+
+    cleanup();
+  }
+
+  function handleResponse(event) {
+    if (!iframe || event.source !== iframe.contentWindow) return;
+
+    const data = event.data;
+
+    if (!data || data.type !== "monthlyUpdateResult") return;
+
+    responseReceived = true;
+
+    const result = data.result || {};
+
+    showResult(
+      result.success === true,
+      result.message || "The server did not return a message."
+    );
+  }
+
   try {
 
-    // Compress image
     const imageData = await compressImage(fileInput.files[0]);
 
-    imageMessage.textContent = "Sending image and points...";
-    pointsMessage.textContent = "Sending image and points...";
+    imageMessage.textContent = "Uploading image...";
+    pointsMessage.textContent = "Saving points...";
 
-    // Create hidden iframe
-    const iframe = document.createElement("iframe");
+    iframe = document.createElement("iframe");
 
     const frameName = "monthlyUpdateFrame_" + Date.now();
 
@@ -428,8 +469,9 @@ async function submitMonthlyUpdate(month) {
 
     document.body.appendChild(iframe);
 
-    // Create POST form
-    const form = document.createElement("form");
+    window.addEventListener("message", handleResponse);
+
+    form = document.createElement("form");
 
     form.method = "POST";
     form.action = APPS_SCRIPT_URL;
@@ -437,15 +479,11 @@ async function submitMonthlyUpdate(month) {
     form.style.display = "none";
 
     function addField(name, value) {
-
       const input = document.createElement("input");
-
       input.type = "hidden";
       input.name = name;
       input.value = value;
-
       form.appendChild(input);
-
     }
 
     addField("action", "monthlyUpdate");
@@ -457,58 +495,31 @@ async function submitMonthlyUpdate(month) {
 
     document.body.appendChild(form);
 
-    // Submit both together in ONE request
     form.submit();
 
-    imageMessage.textContent = "Submission sent. Processing...";
-    pointsMessage.textContent = "Submission sent. Processing...";
+    timeoutId = setTimeout(function() {
 
-    // Apps Script response is cross-origin, so the iframe
-    // cannot expose its JSON response to this page.
-    // Do not claim success without verifying the spreadsheet.
-
-    setTimeout(function() {
-
-      imageMessage.textContent =
-        "Request sent. Please check that the image appears in your dashboard.";
-
-      imageMessage.style.color = "#16733a";
-
-      pointsMessage.textContent =
-        "Request sent. Please check that the points were saved.";
-
-      pointsMessage.style.color = "#16733a";
-
-      fileInput.value = "";
-
-      form.remove();
-      iframe.remove();
-
-      if (button) {
-        button.disabled = false;
-        button.textContent = "SUBMIT " + month.toUpperCase() + " UPDATE";
+      if (!responseReceived) {
+        showResult(
+          false,
+          "No confirmation received. Please check your dashboard before trying again."
+        );
       }
 
-    }, 8000);
+    }, 30000);
 
   } catch (error) {
 
     console.error("Monthly update error:", error);
 
-    imageMessage.textContent = error.message || "Image processing failed.";
-    imageMessage.style.color = "red";
-
-    pointsMessage.textContent = "Update was not submitted.";
-    pointsMessage.style.color = "red";
-
-    if (button) {
-      button.disabled = false;
-      button.textContent = "SUBMIT " + month.toUpperCase() + " UPDATE";
-    }
+    showResult(
+      false,
+      error.message || "Image processing failed. Please try again."
+    );
 
   }
-
 }
+
 
 
 
