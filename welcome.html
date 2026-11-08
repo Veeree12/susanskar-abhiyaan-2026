@@ -30,17 +30,11 @@
         accept="image/*"
       >
 
-      <button onclick="uploadImage('August')">
-        Upload August Sheet
-      </button>
-
       <p id="August-message"></p>
-
 
       <label class="points-label">
         August Points
       </label>
-
       <input
         type="number"
         id="August-points"
@@ -54,7 +48,7 @@
         class="points-button"
         onclick="savePoints('August')"
       >
-        Save August Points
+        SUBMIT AUGUST UPDATE
       </button>
 
       <p id="August-points-message"></p>
@@ -77,10 +71,6 @@
         accept="image/*"
       >
 
-      <button onclick="uploadImage('September')">
-        Upload September Sheet
-      </button>
-
       <p id="September-message"></p>
 
 
@@ -97,11 +87,9 @@
         placeholder="Enter September points"
       >
 
-      <button
-        class="points-button"
-        onclick="savePoints('September')"
-      >
-        Save September Points
+      <button class="points-button"
+        onclick="submitMonthlyUpdate('September')">
+        SUBMIT SEPTEMBER UPDATE
       </button>
 
       <p id="September-points-message"></p>
@@ -144,11 +132,9 @@
         placeholder="Enter October points"
       >
 
-      <button
-        class="points-button"
-        onclick="savePoints('October')"
-      >
-        Save October Points
+      <button class="points-button"
+        onclick="submitMonthlyUpdate('October')">
+        SUBMIT OCTOBER UPDATE
       </button>
 
       <p id="October-points-message"></p>
@@ -190,11 +176,9 @@
         placeholder="Enter final total points"
       >
 
-      <button
-        class="points-button"
-        onclick="savePoints('Final Total Points')"
-      >
-        Save Final Total Points
+      <button class="points-button"
+        onclick="submitMonthlyUpdate('Total Points')">
+        SUBMIT FINAL TOTAL UPDATE
       </button>
 
       <p id="Final Total Points-points-message"></p>
@@ -253,573 +237,280 @@ if (!dob || !whatsapp) {
 }
 
 
+
 // ===============================
-// UPLOAD IMAGE
+// COMPRESS IMAGE
 // ===============================
 
-async function uploadImage(month) {
+function compressImage(file) {
 
-  const fileInput =
-    document.getElementById(month);
+  return new Promise(function(resolve, reject) {
 
-  const message =
-    document.getElementById(
-      month + "-message"
-    );
+    const reader = new FileReader();
 
-  if (!fileInput.files.length) {
+    reader.onload = function() {
 
-    message.textContent =
-      "Please select an image first.";
+      const img = new Image();
 
-    message.style.color =
-      "red";
+      img.onload = function() {
 
-    return;
-  }
+        const MAX_SIZE = 1000;
 
-  const file =
-    fileInput.files[0];
+        let width = img.width;
+        let height = img.height;
 
-  message.textContent =
-    "Preparing image...";
+        if (width > MAX_SIZE || height > MAX_SIZE) {
 
-  message.style.color =
-    "#555";
+          if (width > height) {
+            height = Math.round(height * MAX_SIZE / width);
+            width = MAX_SIZE;
+          } else {
+            width = Math.round(width * MAX_SIZE / height);
+            height = MAX_SIZE;
+          }
 
+        }
 
-  const reader =
-    new FileReader();
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
 
+        const ctx = canvas.getContext("2d");
 
-  reader.onload =
-    function () {
+        if (!ctx) {
+          reject(new Error("Unable to process image."));
+          return;
+        }
 
-      const img =
-        new Image();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
 
+        ctx.drawImage(img, 0, 0, width, height);
 
-      img.onload =
-        function () {
+        function makeBlob(quality) {
 
-          /*
-           * Google Sheets has a maximum
-           * image size of 1 million pixels.
-           *
-           * Keeping both dimensions at
-           * 1000px or less guarantees
-           * that limit is not exceeded.
-           */
+          canvas.toBlob(function(blob) {
 
-          const MAX_SIZE = 1000;
-
-          let width = img.width;
-          let height = img.height;
-
-
-          if (
-            width > MAX_SIZE ||
-            height > MAX_SIZE
-          ) {
-
-            if (width > height) {
-
-              height =
-                Math.round(
-                  height *
-                  MAX_SIZE /
-                  width
-                );
-
-              width =
-                MAX_SIZE;
-
-            } else {
-
-              width =
-                Math.round(
-                  width *
-                  MAX_SIZE /
-                  height
-                );
-
-              height =
-                MAX_SIZE;
+            if (!blob) {
+              reject(new Error("Image compression failed."));
+              return;
             }
-          }
 
+            if (blob.size > 1.5 * 1024 * 1024 && quality > 0.45) {
+              makeBlob(quality - 0.10);
+              return;
+            }
 
-          const canvas =
-            document.createElement(
-              "canvas"
-            );
+            if (blob.size > 1.5 * 1024 * 1024) {
+              reject(new Error("Image is too large. Choose another photo."));
+              return;
+            }
 
-          canvas.width =
-            width;
+            const compressedReader = new FileReader();
 
-          canvas.height =
-            height;
+            compressedReader.onload = function() {
+              resolve(compressedReader.result);
+            };
 
+            compressedReader.onerror = function() {
+              reject(new Error("Unable to read compressed image."));
+            };
 
-          const ctx =
-            canvas.getContext(
-              "2d"
-            );
+            compressedReader.readAsDataURL(blob);
 
+          }, "image/jpeg", quality);
 
-          if (!ctx) {
+        }
 
-            message.textContent =
-              "Unable to process this image.";
+        makeBlob(0.85);
 
-            message.style.color =
-              "red";
+      };
 
-            return;
-          }
+      img.onerror = function() {
+        reject(new Error("Unsupported image. Please choose a JPG or PNG."));
+      };
 
+      img.src = reader.result;
 
-          /*
-           * White background so PNG images
-           * with transparency don't cause
-           * problems when converted to JPEG.
-           */
-
-          ctx.fillStyle =
-            "#ffffff";
-
-          ctx.fillRect(
-            0,
-            0,
-            width,
-            height
-          );
-
-
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            width,
-            height
-          );
-
-
-          /*
-           * Try JPEG compression.
-           * We keep reducing quality until
-           * the image is comfortably below
-           * Google's 2 MB limit.
-           */
-
-          function makeCompressedImage(
-            quality
-          ) {
-
-            canvas.toBlob(
-              function (blob) {
-
-                if (!blob) {
-
-                  message.textContent =
-                    "Unable to compress this image.";
-
-                  message.style.color =
-                    "red";
-
-                  return;
-                }
-
-
-                /*
-                 * Keep a safety margin below
-                 * Google's 2 MB limit.
-                 */
-
-                if (
-                  blob.size > 1.5 * 1024 * 1024 &&
-                  quality > 0.45
-                ) {
-
-                  makeCompressedImage(
-                    quality - 0.10
-                  );
-
-                  return;
-                }
-
-
-                /*
-                 * Convert compressed image
-                 * to Base64.
-                 */
-
-                const compressedReader =
-                  new FileReader();
-
-
-                compressedReader.onload =
-                  function () {
-
-                    const imageData =
-                      compressedReader.result;
-
-
-                    message.textContent =
-                      "Uploading...";
-
-                    message.style.color =
-                      "#555";
-
-
-                    /*
-                     * Create a hidden iframe.
-                     *
-                     * This prevents the phone browser
-                     * from leaving your website and
-                     * opening the Apps Script page.
-                     */
-
-                    const iframe =
-                      document.createElement(
-                        "iframe"
-                      );
-
-                    const frameName =
-                      "uploadFrame_" +
-                      Date.now();
-
-                    iframe.name =
-                      frameName;
-
-                    iframe.style.display =
-                      "none";
-
-                    document.body.appendChild(
-                      iframe
-                    );
-
-
-                    /*
-                     * Create a normal POST form.
-                     */
-
-                    const form =
-                      document.createElement(
-                        "form"
-                      );
-
-                    form.method =
-                      "POST";
-
-                    form.action =
-                      APPS_SCRIPT_URL;
-
-                    form.target =
-                      frameName;
-
-                    form.style.display =
-                      "none";
-
-
-                    function addField(
-                      name,
-                      value
-                    ) {
-
-                      const input =
-                        document.createElement(
-                          "input"
-                        );
-
-                      input.type =
-                        "hidden";
-
-                      input.name =
-                        name;
-
-                      input.value =
-                        value;
-
-                      form.appendChild(
-                        input
-                      );
-                    }
-
-
-                    addField(
-                      "action",
-                      "upload"
-                    );
-
-                    addField(
-                      "dob",
-                      dob
-                    );
-
-                    addField(
-                      "whatsapp",
-                      whatsapp
-                    );
-
-                    addField(
-                      "month",
-                      month
-                    );
-
-                    addField(
-                      "imageData",
-                      imageData
-                    );
-
-
-                    document.body.appendChild(
-                      form
-                    );
-
-
-                    /*
-                     * Send to Apps Script
-                     * without navigating away.
-                     */
-
-                    form.submit();
-
-
-                    message.textContent =
-                      "Upload processing...";
-
-                    message.style.color =
-                      "#555";
-
-
-                    /*
-                     * Give Apps Script time to
-                     * insert the image.
-                     */
-
-                    setTimeout(
-                      function () {
-
-                        message.textContent =
-                          "✓ Upload Done.";
-
-                        message.style.color =
-                          "green";
-
-                        fileInput.value =
-                          "";
-
-                        form.remove();
-                        iframe.remove();
-
-                      },
-                      5000
-                    );
-
-                  };
-
-
-                compressedReader.readAsDataURL(
-                  blob
-                );
-
-              },
-              "image/jpeg",
-              quality
-            );
-          }
-
-
-          /*
-           * Start with good quality.
-           * The function automatically
-           * reduces it if necessary.
-           */
-
-          makeCompressedImage(0.85);
-
-        };
-
-
-      img.onerror =
-        function () {
-
-          message.textContent =
-            "This photo format is not supported. Please choose a JPG or PNG photo.";
-
-          message.style.color =
-            "red";
-        };
-
-
-      img.src =
-        reader.result;
     };
 
-
-  reader.onerror =
-    function () {
-
-      message.textContent =
-        "Unable to read this image.";
-
-      message.style.color =
-        "red";
+    reader.onerror = function() {
+      reject(new Error("Unable to read selected image."));
     };
 
+    reader.readAsDataURL(file);
 
-  reader.readAsDataURL(file);
+  });
 
 }
 
+
 // ===============================
-// SAVE POINTS
+// COMBINED IMAGE + POINTS SUBMISSION
 // ===============================
 
-async function savePoints(category) {
+async function submitMonthlyUpdate(month) {
 
-  const input =
-    document.getElementById(
-      category + "-points"
-    );
+  const fileInput = document.getElementById(month);
 
-  const message =
-    document.getElementById(
-      category + "-points-message"
-    );
+  const pointsInput = document.getElementById(month + "-points");
 
+  const imageMessage = document.getElementById(month + "-message");
 
-  const points =
-    input.value.trim();
+  const pointsMessage = document.getElementById(month + "-points-message");
 
+  const button = document.querySelector(
+    `button[onclick="submitMonthlyUpdate('${month}')"]`
+  );
+
+  // Validate image
+  if (!fileInput || !fileInput.files.length) {
+    imageMessage.textContent = "Please select an image first.";
+    imageMessage.style.color = "red";
+    return;
+  }
+
+  // Validate points
+  const points = pointsInput.value.trim();
 
   if (points === "") {
-
-    message.textContent =
-      "Please enter points.";
-
-    message.style.color =
-      "red";
-
+    pointsMessage.textContent = "Please enter points.";
+    pointsMessage.style.color = "red";
     return;
-
   }
 
+  const numericPoints = Number(points);
 
-  const numericPoints =
-    Number(points);
-
-
-  if (
-    isNaN(numericPoints) ||
-    numericPoints < 0
-  ) {
-
-    message.textContent =
-      "Please enter a valid points value.";
-
-    message.style.color =
-      "red";
-
+  if (!Number.isFinite(numericPoints) || numericPoints < 0) {
+    pointsMessage.textContent = "Please enter valid points.";
+    pointsMessage.style.color = "red";
     return;
-
   }
 
+  if (!Number.isInteger(numericPoints)) {
+    pointsMessage.textContent = "Please enter whole-number points.";
+    pointsMessage.style.color = "red";
+    return;
+  }
 
-  message.textContent =
-    "Saving...";
+  if (!dob || !whatsapp) {
+    alert("Please login first.");
+    window.location.href = "index.html";
+    return;
+  }
 
-  message.style.color =
-    "#555";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "PROCESSING...";
+  }
 
+  imageMessage.textContent = "Compressing image...";
+  imageMessage.style.color = "#555";
 
-  const formData =
-    new URLSearchParams();
-
-
-  formData.append(
-    "action",
-    "savePoints"
-  );
-
-  formData.append(
-    "dob",
-    dob
-  );
-
-  formData.append(
-    "whatsapp",
-    whatsapp
-  );
-
-
-  // For the final points,
-  // send the correct Apps Script category
-  const apiCategory =
-    category === "Final Total Points"
-      ? "Final Total Points"
-      : category;
-
-
-  formData.append(
-    "month",
-    apiCategory
-  );
-
-  formData.append(
-    "points",
-    numericPoints
-  );
-
+  pointsMessage.textContent = "Preparing points...";
+  pointsMessage.style.color = "#555";
 
   try {
 
-    const response =
-      await fetch(
-        APPS_SCRIPT_URL,
-        {
-          method: "POST",
-          body: formData
-        }
-      );
+    // Compress image
+    const imageData = await compressImage(fileInput.files[0]);
 
+    imageMessage.textContent = "Sending image and points...";
+    pointsMessage.textContent = "Sending image and points...";
 
-    const result =
-      await response.json();
+    // Create hidden iframe
+    const iframe = document.createElement("iframe");
 
+    const frameName = "monthlyUpdateFrame_" + Date.now();
 
-    if (result.success) {
+    iframe.name = frameName;
+    iframe.style.display = "none";
 
-      message.textContent =
-        "✓ " +
-        result.message;
+    document.body.appendChild(iframe);
 
-      message.style.color =
-        "green";
+    // Create POST form
+    const form = document.createElement("form");
 
-    } else {
+    form.method = "POST";
+    form.action = APPS_SCRIPT_URL;
+    form.target = frameName;
+    form.style.display = "none";
 
-      message.textContent =
-        result.message;
+    function addField(name, value) {
 
-      message.style.color =
-        "red";
+      const input = document.createElement("input");
+
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+
+      form.appendChild(input);
 
     }
 
+    addField("action", "monthlyUpdate");
+    addField("dob", dob);
+    addField("whatsapp", whatsapp);
+    addField("month", month);
+    addField("points", numericPoints);
+    addField("imageData", imageData);
+
+    document.body.appendChild(form);
+
+    // Submit both together in ONE request
+    form.submit();
+
+    imageMessage.textContent = "Submission sent. Processing...";
+    pointsMessage.textContent = "Submission sent. Processing...";
+
+    // Apps Script response is cross-origin, so the iframe
+    // cannot expose its JSON response to this page.
+    // Do not claim success without verifying the spreadsheet.
+
+    setTimeout(function() {
+
+      imageMessage.textContent =
+        "Request sent. Please check that the image appears in your dashboard.";
+
+      imageMessage.style.color = "#16733a";
+
+      pointsMessage.textContent =
+        "Request sent. Please check that the points were saved.";
+
+      pointsMessage.style.color = "#16733a";
+
+      fileInput.value = "";
+
+      form.remove();
+      iframe.remove();
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = "SUBMIT " + month.toUpperCase() + " UPDATE";
+      }
+
+    }, 8000);
 
   } catch (error) {
 
-    message.textContent =
-      "Unable to save points. Please try again.";
+    console.error("Monthly update error:", error);
 
-    message.style.color =
-      "red";
+    imageMessage.textContent = error.message || "Image processing failed.";
+    imageMessage.style.color = "red";
+
+    pointsMessage.textContent = "Update was not submitted.";
+    pointsMessage.style.color = "red";
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "SUBMIT " + month.toUpperCase() + " UPDATE";
+    }
 
   }
 
 }
+
+
 
 </script>
 
