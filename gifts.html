@@ -159,6 +159,58 @@
         grid-template-columns: 1fr;
       }
     }
+  /* Sticky gift budget bar for mobile and desktop */
+    .gift-sticky-summary {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #ffffff;
+      padding: 12px 15px;
+      margin: 0 0 15px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+      border: 1px solid #ddd;
+    }
+    
+    .gift-sticky-title {
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .gift-sticky-values {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+    
+    .gift-sticky-values small {
+      display: block;
+      color: #666;
+      font-size: 11px;
+    }
+    
+    .gift-sticky-values strong {
+      display: block;
+      font-size: 17px;
+      margin-top: 4px;
+      color: #174c8e;
+    }
+    
+    #topRemainingAllowance {
+      color: #16733a;
+    }
+    
+    @media(max-width: 450px) {
+      .gift-sticky-values strong {
+        font-size: 15px;
+      }
+    
+      .gift-sticky-summary {
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 
@@ -216,7 +268,34 @@
   <!-- GIFT SELECTION -->
 
   <section id="giftSection" class="hidden">
+<!-- STICKY GIFT BUDGET BAR -->
 
+  <div class="gift-sticky-summary">
+  
+    <div class="gift-sticky-title">
+      Your Gift Budget
+    </div>
+  
+    <div class="gift-sticky-values">
+  
+      <div>
+        <small>Total Allowance</small>
+        <strong id="topGiftAllowance">₹0</strong>
+      </div>
+  
+      <div>
+        <small>Selected Value</small>
+        <strong id="topSelectedCost">₹0</strong>
+      </div>
+  
+      <div>
+        <small>Remaining</small>
+        <strong id="topRemainingAllowance">₹0</strong>
+      </div>
+  
+    </div>
+  
+  </div>
     <div class="gift-card">
 
       <h2 id="studentGreeting">
@@ -619,6 +698,16 @@ function renderGifts() {
       "₹" + total.toLocaleString("en-IN");
   
     document.getElementById("remainingPoints").textContent =
+      "₹" + (studentAllowance - total).toLocaleString("en-IN");
+  
+    // Update sticky budget bar
+    document.getElementById("topGiftAllowance").textContent =
+      "₹" + studentAllowance.toLocaleString("en-IN");
+  
+    document.getElementById("topSelectedCost").textContent =
+      "₹" + total.toLocaleString("en-IN");
+  
+    document.getElementById("topRemainingAllowance").textContent =
       "₹" + (studentAllowance - total).toLocaleString("en-IN");
   }
 
