@@ -337,10 +337,6 @@ function compressImage(file) {
 }
 
 
-// ===============================
-// COMBINED IMAGE + POINTS SUBMISSION
-// ===============================
-
 
 async function submitMonthlyUpdate(month) {
 
@@ -392,6 +388,16 @@ async function submitMonthlyUpdate(month) {
     return;
   }
 
+  const requestId = "upload_" + Date.now() + "_" +
+    Math.random().toString(36).slice(2, 10);
+
+  let iframe = null;
+  let form = null;
+  let statusScript = null;
+  let timeoutId = null;
+  let pollTimer = null;
+  let completed = false;
+
   if (button) {
     button.disabled = true;
     button.textContent = "PROCESSING...";
@@ -403,17 +409,17 @@ async function submitMonthlyUpdate(month) {
   pointsMessage.textContent = "Preparing points...";
   pointsMessage.style.color = "#555";
 
-  let iframe = null;
-  let form = null;
-  let responseReceived = false;
-  let timeoutId = null;
-
   function cleanup() {
+
     if (timeoutId) clearTimeout(timeoutId);
-    window.removeEventListener("message", handleResponse);
+    if (pollTimer) clearTimeout(pollTimer);
+
+    if (statusScript) statusScript.remove();
 
     if (form) form.remove();
     if (iframe) iframe.remove();
+
+    delete window.monthlyUpdateStatusCallback;
 
     if (button) {
       button.disabled = false;
@@ -421,13 +427,19 @@ async function submitMonthlyUpdate(month) {
     }
   }
 
-  function showResult(success, message) {
+  function showResult(result) {
+
+    if (completed) return;
+    completed = true;
+
+    const success = result.success === true;
+    const message = result.message || "Upload status received.";
+
     imageMessage.textContent = message;
     pointsMessage.textContent = message;
 
-    const color = success ? "#16733a" : "red";
-    imageMessage.style.color = color;
-    pointsMessage.style.color = color;
+    imageMessage.style.color = success ? "#16733a" : "red";
+    pointsMessage.style.color = success ? "#16733a" : "red";
 
     if (success) {
       fileInput.value = "";
@@ -436,22 +448,48 @@ async function submitMonthlyUpdate(month) {
     cleanup();
   }
 
-  function handleResponse(event) {
-    const data = event.data;
+  function checkUploadStatus() {
 
-    console.log("Apps Script response:", event.origin, data);
+    if (completed) return;
 
-    if (!data || data.type !== "monthlyUpdateResult") return;
+    if (statusScript) {
+      statusScript.remove();
+    }
 
-    responseReceived = true;
+    statusScript = document.createElement("script");
 
-    const result = data.result || {};
+    statusScript.src =
+      APPS_SCRIPT_URL +
+      "?action=monthlyUpdateStatus&requestId=" +
+      encodeURIComponent(requestId) +
+      "&_=" + Date.now();
 
-    showResult(
-      result.success === true,
-      result.message || "The server did not return a message."
-    );
+    statusScript.onerror = function() {
+
+      if (!completed) {
+        pollTimer = setTimeout(checkUploadStatus, 3000);
+      }
+
+    };
+
+    document.body.appendChild(statusScript);
   }
+
+  window.monthlyUpdateStatusCallback = function(result) {
+
+    if (completed) return;
+
+    if (result && result.pending === true) {
+      pollTimer = setTimeout(checkUploadStatus, 2000);
+      return;
+    }
+
+    showResult(result || {
+      success: false,
+      message: "Unable to retrieve upload status."
+    });
+
+  };
 
   try {
 
@@ -462,14 +500,12 @@ async function submitMonthlyUpdate(month) {
 
     iframe = document.createElement("iframe");
 
-    const frameName = "monthlyUpdateFrame_" + Date.now();
+    const frameName = "monthlyUpdateFrame_" + requestId;
 
     iframe.name = frameName;
     iframe.style.display = "none";
 
     document.body.appendChild(iframe);
-
-    window.addEventListener("message", handleResponse);
 
     form = document.createElement("form");
 
@@ -479,14 +515,18 @@ async function submitMonthlyUpdate(month) {
     form.style.display = "none";
 
     function addField(name, value) {
+
       const input = document.createElement("input");
+
       input.type = "hidden";
       input.name = name;
       input.value = value;
+
       form.appendChild(input);
     }
 
     addField("action", "monthlyUpdate");
+    addField("requestId", requestId);
     addField("dob", dob);
     addField("whatsapp", whatsapp);
     addField("month", month);
@@ -497,25 +537,32 @@ async function submitMonthlyUpdate(month) {
 
     form.submit();
 
+    imageMessage.textContent = "Upload submitted. Waiting for confirmation...";
+    pointsMessage.textContent = "Waiting for confirmation...";
+
+    // Check for the actual result after allowing the POST to start.
+    pollTimer = setTimeout(checkUploadStatus, 2500);
+
+    // Stop waiting after 60 seconds.
     timeoutId = setTimeout(function() {
 
-      if (!responseReceived) {
-        showResult(
-          false,
-          "No confirmation received. Please check your dashboard before trying again."
-        );
+      if (!completed) {
+        showResult({
+          success: false,
+          message: "Confirmation timed out. Please check your dashboard before retrying."
+        });
       }
 
-    }, 30000);
+    }, 60000);
 
   } catch (error) {
 
     console.error("Monthly update error:", error);
 
-    showResult(
-      false,
-      error.message || "Image processing failed. Please try again."
-    );
+    showResult({
+      success: false,
+      message: error.message || "Image processing failed."
+    });
 
   }
 }
