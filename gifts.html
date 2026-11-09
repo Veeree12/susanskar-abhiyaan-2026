@@ -225,24 +225,34 @@
 
       <div class="points-box">
 
-        <p>Your Final Total Points</p>
+  <p>Your Final Total Points</p>
 
-        <div
-          class="points-number"
-          id="availablePoints"
-        >
-          0
-        </div>
-
+      <div
+        class="points-number"
+        id="availablePoints"
+      >
+        0
       </div>
+    
+      <hr>
+    
+      <p>Your Gift Allowance</p>
+    
+      <div
+        class="points-number"
+        id="giftAllowanceDisplay"
+      >
+        ₹0
+      </div>
+    
+    </div>
 
       <h2>Available Gifts</h2>
 
       <p>
-         Explore all gifts below. Gifts requiring more points
-         than you have will be displayed but locked.
+        Select gifts from the unlocked categories.
+        Your combined gift cost must stay within your rupee allowance.
       </p>
-
       <div
         class="gift-grid"
         id="giftGrid"
@@ -250,26 +260,14 @@
 
       <div class="gift-summary">
 
-        <p>
-          Available Points:
-          <strong id="summaryAvailable">0</strong>
-        </p>
-
-        <p>
-          Selected Gifts:
-          <strong id="selectedCount">0</strong>
-        </p>
-
-        <p>
-          Points Required:
-          <strong id="selectedCost">0</strong>
-        </p>
-
-        <p>
-          Remaining Points:
-          <strong id="remainingPoints">0</strong>
-        </p>
-
+        <p>Gift Allowance: <strong id="summaryAvailable">₹0</strong></p>
+      
+        <p>Selected Gifts: <strong id="selectedCount">0</strong></p>
+      
+        <p>Total Gift Cost: <strong id="selectedCost">₹0</strong></p>
+      
+        <p>Remaining Allowance: <strong id="remainingPoints">₹0</strong></p>
+      
       </div>
 
       <button
@@ -322,14 +320,20 @@
   // We will replace these with your actual gifts later.
 
   const giftCatalogue = [
-    { name: "Gift A", points: 50, icon: "🎁" },
-    { name: "Gift B", points: 100, icon: "🎒" },
-    { name: "Gift C", points: 200, icon: "⌚" }
+    { name: "Gift ₹200", price: 200, minPoints: 0, icon: "🎁" },
+    { name: "Gift ₹500", price: 500, minPoints: 10001, icon: "🎒" },
+    { name: "Gift ₹1000", price: 1000, minPoints: 20001, icon: "⌚" },
+    { name: "Gift ₹2000", price: 2000, minPoints: 40001, icon: "🎧" },
+    { name: "Gift ₹3000", price: 3000, minPoints: 60001, icon: "🎮" },
+    { name: "Gift ₹4000", price: 4000, minPoints: 80001, icon: "🚲" },
+    { name: "Gift ₹5000", price: 5000, minPoints: 100001, icon: "🎁" }
   ];
 
   let studentDOB = "";
   let studentWhatsapp = "";
   let studentPoints = 0;
+  let studentAllowance = 0;
+  let unlockedCategories = [];
   let selectedGifts = [];
 
 
@@ -450,6 +454,9 @@
       studentDOB = dob;
       studentWhatsapp = whatsapp;
       studentPoints = Number(result.finalPoints) || 0;
+      studentAllowance = Number(result.giftAllowance) || 0;
+
+      unlockedCategories = result.unlockedCategories || [];
 
       document.getElementById("verificationSection")
         .classList.add("hidden");
@@ -474,10 +481,12 @@
         "Welcome, " + result.name + "!";
 
       document.getElementById("availablePoints")
-        .textContent = studentPoints;
-
+        .textContent = studentPoints.toLocaleString("en-IN");
+      
       document.getElementById("summaryAvailable")
-        .textContent = studentPoints;
+        .textContent = "₹" + studentAllowance.toLocaleString("en-IN");
+      document.getElementById("giftAllowanceDisplay")
+        .textContent = "₹" + studentAllowance.toLocaleString("en-IN");
 
       renderGifts();
 
@@ -501,250 +510,211 @@
 
 
   
+
 function renderGifts() {
-
-  const grid = document.getElementById("giftGrid");
-
-  grid.innerHTML = "";
-
-  // Display ALL gifts, including locked gifts.
-  giftCatalogue.forEach(function(gift) {
-
-    const card = document.createElement("div");
-
-    const locked = gift.points > studentPoints;
-
-    card.className = locked
-      ? "gift-item locked"
-      : "gift-item";
-
-    card.innerHTML = `
-      <div class="gift-placeholder">
-        ${gift.icon}
-      </div>
-
-      <h3>${gift.name}</h3>
-
-      <p class="gift-points">
-        ${gift.points} Points
-      </p>
-
-      ${
-        locked
-          ? `
-            <label>
-              <input type="checkbox" disabled>
-              Locked
-            </label>
-
-            <p class="gift-lock-message">
-              Need ${gift.points - studentPoints}
-              more points to unlock
-            </p>
-          `
-          : `
-            <label>
-              <input
-                type="checkbox"
-                value="${gift.name}"
-                onchange="toggleGift('${gift.name}', this)"
-              >
-              Select Gift
-            </label>
-          `
-      }
-    `;
-
-    grid.appendChild(card);
-
-  });
-
-  updateSummary();
-}
-
-
-
-  function toggleGift(name, checkbox) {
-
-    const gift =
-      giftCatalogue.find(
-        item => item.name === name
-      );
-
-    if (!gift) return;
-
-    if (checkbox.checked) {
-
-      const currentCost =
-        selectedGifts.reduce(
-          (sum, item) => sum + item.points,
-          0
-        );
-
-      if (
-        currentCost + gift.points >
-        studentPoints
-      ) {
-
-        checkbox.checked = false;
-
-        showMessage(
-          "selectionMessage",
-          "These gifts exceed your available points."
-        );
-
-        return;
-      }
-
-      selectedGifts.push(gift);
-
-      checkbox.closest(".gift-item")
-        .classList.add("selected");
-
-    } else {
-
-      selectedGifts =
-        selectedGifts.filter(
-          item => item.name !== name
-        );
-
-      checkbox.closest(".gift-item")
-        .classList.remove("selected");
-
-    }
-
-    showMessage("selectionMessage", "");
-
+    const grid = document.getElementById("giftGrid");
+    grid.innerHTML = "";
+  
+    giftCatalogue.forEach(function(gift) {
+      const card = document.createElement("div");
+  
+      const unlocked = unlockedCategories.includes(gift.price);
+  
+      card.className = unlocked
+        ? "gift-item"
+        : "gift-item locked";
+  
+      card.innerHTML = `
+        <div class="gift-placeholder">${gift.icon}</div>
+  
+        <h3>${gift.name}</h3>
+  
+        <p class="gift-points">
+          Gift Value: ₹${gift.price.toLocaleString("en-IN")}
+        </p>
+  
+        ${
+          unlocked
+            ? `
+              <label>
+                <input
+                  type="checkbox"
+                  value="${gift.name}"
+                  onchange="toggleGift('${gift.name}', this)"
+                >
+                Select Gift
+              </label>
+            `
+            : `
+              <label>
+                <input type="checkbox" disabled>
+                Locked
+              </label>
+  
+              <p class="gift-lock-message">
+                Unlock at ${gift.minPoints.toLocaleString("en-IN")} points
+              </p>
+            `
+        }
+      `;
+  
+      grid.appendChild(card);
+    });
+  
     updateSummary();
-
   }
-
-
-  function updateSummary() {
-
-    const total =
-      selectedGifts.reduce(
-        (sum, gift) => sum + gift.points,
+  
+  
+  function toggleGift(name, checkbox) {
+    const gift = giftCatalogue.find(item => item.name === name);
+  
+    if (!gift) return;
+  
+    if (checkbox.checked) {
+      const currentCost = selectedGifts.reduce(
+        (sum, item) => sum + item.price,
         0
       );
-
-    document.getElementById("selectedCount")
-      .textContent = selectedGifts.length;
-
-    document.getElementById("selectedCost")
-      .textContent = total;
-
-    document.getElementById("remainingPoints")
-      .textContent = studentPoints - total;
-
+  
+      if (currentCost + gift.price > studentAllowance) {
+        checkbox.checked = false;
+  
+        showMessage(
+          "selectionMessage",
+          "Your selected gifts exceed your ₹" +
+          studentAllowance.toLocaleString("en-IN") +
+          " allowance."
+        );
+  
+        return;
+      }
+  
+      selectedGifts.push(gift);
+  
+      checkbox.closest(".gift-item").classList.add("selected");
+  
+    } else {
+      selectedGifts = selectedGifts.filter(
+        item => item.name !== name
+      );
+  
+      checkbox.closest(".gift-item").classList.remove("selected");
+    }
+  
+    showMessage("selectionMessage", "");
+    updateSummary();
+  }
+  
+  
+  function updateSummary() {
+    const total = selectedGifts.reduce(
+      (sum, gift) => sum + gift.price,
+      0
+    );
+  
+    document.getElementById("selectedCount").textContent =
+      selectedGifts.length;
+  
+    document.getElementById("selectedCost").textContent =
+      "₹" + total.toLocaleString("en-IN");
+  
+    document.getElementById("remainingPoints").textContent =
+      "₹" + (studentAllowance - total).toLocaleString("en-IN");
   }
 
 
-  async function confirmGifts() {
+
+  
+async function confirmGifts() {
 
     if (selectedGifts.length === 0) {
-
       showMessage(
         "selectionMessage",
         "Please select at least one gift."
       );
-
       return;
     }
-
-    const names =
-      selectedGifts.map(
-        gift => gift.name
-      );
-
-    const total =
-      selectedGifts.reduce(
-        (sum, gift) => sum + gift.points,
-        0
-      );
-
+  
+    const names = selectedGifts.map(gift => gift.name);
+  
+    const total = selectedGifts.reduce(
+      (sum, gift) => sum + gift.price,
+      0
+    );
+  
+    const remaining = studentAllowance - total;
+  
     const confirmed = confirm(
       "Your selected gifts:\n\n" +
       names.join("\n") +
-      "\n\nTotal points: " + total +
+      "\n\nTotal Gift Cost: ₹" + total.toLocaleString("en-IN") +
+      "\nRemaining Allowance: ₹" + remaining.toLocaleString("en-IN") +
       "\n\nThis selection is FINAL and cannot be changed. Continue?"
     );
-
+  
     if (!confirmed) return;
-
-    const button =
-      document.getElementById("submitButton");
-
+  
+    const button = document.getElementById("submitButton");
+  
     button.disabled = true;
     button.textContent = "SUBMITTING...";
-
+  
     try {
-
-      const payload =
-        new URLSearchParams({
-
-          action: "submitGifts",
-
-          dob: studentDOB,
-
-          whatsapp: studentWhatsapp,
-
-          gifts: JSON.stringify(names)
-
-        });
-
-      const response =
-        await fetch(
-          APPS_SCRIPT_URL,
-          {
-            method: "POST",
-            body: payload
-          }
-        );
-
-      const result =
-        await response.json();
-
+  
+      const payload = new URLSearchParams({
+        action: "submitGifts",
+        dob: studentDOB,
+        whatsapp: studentWhatsapp,
+        gifts: JSON.stringify(names)
+      });
+  
+      const response = await fetch(
+        APPS_SCRIPT_URL,
+        {
+          method: "POST",
+          body: payload
+        }
+      );
+  
+      const result = await response.json();
+  
       if (!result.success) {
-
         showMessage(
           "selectionMessage",
           result.message || "Submission failed."
         );
-
+  
         button.disabled = false;
-        button.textContent =
-          "SUBMIT FINAL GIFT SELECTION";
-
+        button.textContent = "SUBMIT FINAL GIFT SELECTION";
         return;
       }
-
+  
       document.getElementById("giftSection")
         .classList.add("hidden");
-
+  
       document.getElementById("completedSection")
         .classList.remove("hidden");
-
+  
       document.getElementById("completedGifts")
         .textContent =
-        "Your selected gifts: " + names.join(", ");
-
+        "Your selected gifts: " + names.join(", ") +
+        ". Total cost: ₹" + total.toLocaleString("en-IN");
+  
     } catch (error) {
-
+  
       console.error(error);
-
+  
       showMessage(
         "selectionMessage",
         "Unable to submit. Please try again."
       );
-
+  
       button.disabled = false;
-      button.textContent =
-        "SUBMIT FINAL GIFT SELECTION";
-
+      button.textContent = "SUBMIT FINAL GIFT SELECTION";
+  
     }
-
   }
+
 
 </script>
 
