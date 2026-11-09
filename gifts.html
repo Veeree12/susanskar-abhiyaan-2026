@@ -110,14 +110,13 @@
       font-weight: bold;
       margin-top: 8px;
     }
-    .gift-placeholder {
-      height: 130px;
+    
+    .gift-image {
+      width: 100%;
+      height: 170px;
+      object-fit: contain;
+      background: #ffffff;
       border-radius: 9px;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 42px;
       margin-bottom: 12px;
     }
 
@@ -398,15 +397,30 @@
   // Temporary gift catalogue.
   // We will replace these with your actual gifts later.
 
-  const giftCatalogue = [
-    { name: "Gift ₹200", price: 200, minPoints: 0, icon: "🎁" },
-    { name: "Gift ₹500", price: 500, minPoints: 10001, icon: "🎒" },
-    { name: "Gift ₹1000", price: 1000, minPoints: 20001, icon: "⌚" },
-    { name: "Gift ₹2000", price: 2000, minPoints: 40001, icon: "🎧" },
-    { name: "Gift ₹3000", price: 3000, minPoints: 60001, icon: "🎮" },
-    { name: "Gift ₹4000", price: 4000, minPoints: 80001, icon: "🚲" },
-    { name: "Gift ₹5000", price: 5000, minPoints: 100001, icon: "🎁" }
+  
+  const giftCategories = [
+    { price: 200, count: 21, minPoints: 0 },
+    { price: 500, count: 26, minPoints: 10001 },
+    { price: 1000, count: 31, minPoints: 20001 },
+    { price: 2000, count: 32, minPoints: 40001 },
+    { price: 3000, count: 19, minPoints: 60001 },
+    { price: 4000, count: 18, minPoints: 80001 },
+    { price: 5000, count: 17, minPoints: 100001 }
   ];
+  
+  const giftCatalogue = giftCategories.flatMap(category =>
+    Array.from({ length: category.count }, (_, index) => {
+      const number = String(index + 1).padStart(2, "0");
+  
+      return {
+        name: `₹${category.price} - Gift ${number}`,
+        price: category.price,
+        minPoints: category.minPoints,
+        image: `https://veeree12.github.io/susanskar-abhiyaan-2026/images/gifts/${category.price}/gift-${number}.jpg`
+      };
+    })
+  );
+
 
   let studentDOB = "";
   let studentWhatsapp = "";
@@ -590,58 +604,104 @@
 
   
 
+
 function renderGifts() {
-    const grid = document.getElementById("giftGrid");
-    grid.innerHTML = "";
-  
-    giftCatalogue.forEach(function(gift) {
+  const grid = document.getElementById("giftGrid");
+  grid.innerHTML = "";
+
+  giftCategories.forEach(function(category) {
+
+    const heading = document.createElement("h2");
+    heading.textContent = `Gifts Worth ₹${category.price.toLocaleString("en-IN")}`;
+    heading.style.gridColumn = "1 / -1";
+    heading.style.marginTop = "20px";
+
+    grid.appendChild(heading);
+
+    const categoryGifts = giftCatalogue.filter(
+      gift => gift.price === category.price
+    );
+
+    categoryGifts.forEach(function(gift) {
+
       const card = document.createElement("div");
-  
+
       const unlocked = unlockedCategories.includes(gift.price);
-  
+
       card.className = unlocked
         ? "gift-item"
         : "gift-item locked";
-  
-      card.innerHTML = `
-        <div class="gift-placeholder">${gift.icon}</div>
-  
-        <h3>${gift.name}</h3>
-  
-        <p class="gift-points">
-          Gift Value: ₹${gift.price.toLocaleString("en-IN")}
-        </p>
-  
-        ${
-          unlocked
-            ? `
-              <label>
-                <input
-                  type="checkbox"
-                  value="${gift.name}"
-                  onchange="toggleGift('${gift.name}', this)"
-                >
-                Select Gift
-              </label>
-            `
-            : `
-              <label>
-                <input type="checkbox" disabled>
-                Locked
-              </label>
-  
-              <p class="gift-lock-message">
-                Unlock at ${gift.minPoints.toLocaleString("en-IN")} points
-              </p>
-            `
-        }
-      `;
-  
+
+      const image = document.createElement("img");
+      image.src = gift.image;
+      image.alt = gift.name;
+      image.className = "gift-image";
+      image.loading = "lazy";
+
+      image.onerror = function() {
+        this.alt = "Gift image unavailable";
+        this.style.display = "none";
+      };
+
+      card.appendChild(image);
+
+      const title = document.createElement("h3");
+      title.textContent = gift.name;
+      card.appendChild(title);
+
+      const price = document.createElement("p");
+      price.className = "gift-points";
+      price.textContent =
+        "Gift Value: ₹" + gift.price.toLocaleString("en-IN");
+
+      card.appendChild(price);
+
+      if (unlocked) {
+
+        const label = document.createElement("label");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = gift.name;
+        checkbox.onchange = function() {
+          toggleGift(gift.name, this);
+        };
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(" Select Gift"));
+
+        card.appendChild(label);
+
+      } else {
+
+        const label = document.createElement("label");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.disabled = true;
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(" Locked"));
+
+        card.appendChild(label);
+
+        const message = document.createElement("p");
+        message.className = "gift-lock-message";
+        message.textContent =
+          "Unlock at " +
+          category.minPoints.toLocaleString("en-IN") +
+          " points";
+
+        card.appendChild(message);
+      }
+
       grid.appendChild(card);
     });
-  
-    updateSummary();
-  }
+  });
+
+  updateSummary();
+}
+
   
   
   function toggleGift(name, checkbox) {
